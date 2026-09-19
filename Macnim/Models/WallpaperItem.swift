@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct WallpaperItem: Identifiable {
+struct WallpaperItem: Identifiable, Codable {
     let id: UUID
     var name: String
     var videoURL: URL

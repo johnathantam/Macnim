@@ -8,29 +8,50 @@
 import SwiftUI
 import AppKit
 
+enum AppStartupState {
+    case ready(
+        appSettings: AppSettings,
+        
+        wallpaperRepository: WallpaperRepository,
+        wallpaperManager: WallpaperScreenManager
+    )
+    
+    case failed(Error)
+}
+
 @main
 struct MacnimApp: App {
-    @State private var wallpaperRepository = WallpaperRepository()
-    @State private var wallpaperManager = WallpaperScreenManager()
+    @State private var appStartupState: AppStartupState
+    
+    init() {
+        do {
+            _appStartupState = State(
+                initialValue: .ready(
+                    appSettings: AppSettings(),
+                    
+                    wallpaperRepository: try WallpaperRepository(),
+                    wallpaperManager: try WallpaperScreenManager()
+                )
+            )
+        } catch {
+            _appStartupState = State(
+                initialValue: .failed(error)
+            )
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
-            AppView()
-                .environment(wallpaperRepository)
-                .environment(wallpaperManager)
-                .onAppear {
-                    guard let screen = NSScreen.main else { return }
-                    guard let firstWallpaper = wallpaperRepository.items.first else { return }
+            switch appStartupState {
+                case let .ready(appSettings, wallpaperRepository, wallpaperManager):
+                    AppView()
+                        .environment(appSettings)
+                        .environment(wallpaperRepository)
+                        .environment(wallpaperManager)
 
-                    let displayID = screen.deviceDescription[
-                        NSDeviceDescriptionKey("NSScreenNumber")
-                    ] as! CGDirectDisplayID
-
-                    wallpaperManager.playVideoOnScreen(
-                        displayID: displayID,
-                        videoURL: firstWallpaper.videoURL
-                    )
-                }
+                case let .failed(error):
+                    AppErrorView(error: error)
+            }
         }
     }
 }

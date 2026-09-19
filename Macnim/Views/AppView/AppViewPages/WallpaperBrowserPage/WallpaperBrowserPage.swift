@@ -40,7 +40,21 @@ struct WallpaperBrowserPage: View {
                 WallpaperBrowserItemLayout( minimumColumnWidth: 240, spacing: 8 ) {
                     ForEach(Array(wallpaperRepository.getWallpaperItems().enumerated()), id: \.element.id) { index, wallpaperItem in
                         // Place wallpaper item
-                        WallpaperBrowserItem(wallpaper: wallpaperItem)
+                        WallpaperBrowserItem(
+                            wallpaper: wallpaperItem,
+                            
+                            onSelect: {
+                                
+                            },
+                            
+                            onEdit: {
+                                showEditWallpaperSheet = true
+                            },
+                            
+                            onRemove: {
+                                showRemoveWallpaperSheet = true
+                            }
+                        )
                         
                         // Dynamically stagger wallpaper items
                         if index == 0 {
@@ -81,6 +95,12 @@ struct WallpaperBrowserPage: View {
                     showError = true
                 }
             })
+        }
+        .sheet(isPresented: $showEditWallpaperSheet) {
+            
+        }
+        .sheet(isPresented: $showRemoveWallpaperSheet) {
+            
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {

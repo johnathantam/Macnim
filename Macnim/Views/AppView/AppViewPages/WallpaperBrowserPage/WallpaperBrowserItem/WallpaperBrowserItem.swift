@@ -5,22 +5,35 @@
 //  Created by Johnathan Tam on 2026-09-14.
 //
 
+
 import SwiftUI
 import AVFoundation
 
 struct WallpaperBrowserItem: View {
     private var wallpaper: WallpaperItem
-    
+
+    private var onSelect: () -> Void
+    private var onEdit: () -> Void
+    private var onRemove: () -> Void
+
     @State private var wallpaperThumbnail: NSImage?
     @State private var wallpaperVideoDuration: String?
-    
+
     @State private var wallpaperIsHovered = false
     @State private var wallpaperIsSelected = false
 
-    init(wallpaper: WallpaperItem) {
+    init(
+        wallpaper: WallpaperItem,
+        onSelect: @escaping () -> Void,
+        onEdit: @escaping () -> Void,
+        onRemove: @escaping () -> Void
+    ) {
         self.wallpaper = wallpaper
+        self.onSelect = onSelect
+        self.onEdit = onEdit
+        self.onRemove = onRemove
     }
-    
+
     private func loadThumbnail(from url: URL, at time: CMTime = CMTime(seconds: 0.5, preferredTimescale: 600)) async -> NSImage? {
         let asset = AVURLAsset(url: url)
         let generator = AVAssetImageGenerator(asset: asset)
@@ -44,7 +57,6 @@ struct WallpaperBrowserItem: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            
             if wallpaperIsHovered {
                 // Show wallpaper video preview
                 WallpaperBrowserItemVideoPreview(videoURL: wallpaper.videoURL)
@@ -62,20 +74,40 @@ struct WallpaperBrowserItem: View {
                     .clipped()
             }
 
-            // Duration badge, top-trailing
+            // Top overlay row: overflow menu (leading) + duration badge (trailing)
             VStack {
                 HStack {
-                    Spacer()
-                    if let wallpaperVideoDuration {
-                        Text(wallpaperVideoDuration)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 6))
-                            .padding(8)
+                    if wallpaperIsHovered {
+                        Menu {
+                            Button("Rename…", action: onEdit)
+                            Button("Delete", role: .destructive, action: onRemove)
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .menuStyle(.borderlessButton)
+                        .frame(width: 27, height: 27)
+                        .background(.ultraThinMaterial, in: Circle())
+                        .controlSize(.extraLarge)
+                        .menuIndicator(.hidden)
+                        .fixedSize()
+                        .padding(8)
+
+                        Spacer()
+
+                        if let wallpaperVideoDuration {
+                            Text(wallpaperVideoDuration)
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                                .padding(8)
+                        }
                     }
                 }
+                .animation(.easeInOut(duration: 0.2), value: wallpaperIsHovered)
+                
                 Spacer()
             }
 
@@ -88,15 +120,23 @@ struct WallpaperBrowserItem: View {
                 Text(wallpaper.name)
                     .font(.system(size: 14, weight: .semibold))
                     .lineLimit(1)
-
-                Spacer(minLength: 0)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(.ultraThinMaterial, in: Capsule())
+            .frame(maxWidth: .infinity, alignment: .bottomLeading)
+            .padding(8)
         }
         .aspectRatio(16 / 9, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .contentShape(RoundedRectangle(cornerRadius: 14))
+        .onTapGesture {
+            onSelect()
+        }
+        .contextMenu {
+            Button("Rename…", action: onEdit)
+            Button("Delete", role: .destructive, action: onRemove)
+        }
         .onHover { isHovered in
             wallpaperIsHovered = isHovered
         }
@@ -108,5 +148,16 @@ struct WallpaperBrowserItem: View {
 }
 
 #Preview {
-    
+    WallpaperBrowserItem(
+        wallpaper: WallpaperItem(
+            id: UUID(),
+            name: "Aurora",
+            videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!
+        ),
+        onSelect: {},
+        onEdit: {},
+        onRemove: {}
+    )
+    .frame(width: 240)
+    .padding()
 }

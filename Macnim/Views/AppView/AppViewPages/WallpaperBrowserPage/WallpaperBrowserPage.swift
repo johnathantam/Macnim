@@ -8,16 +8,16 @@
 import SwiftUI
 import AppKit
 
-
-
 struct WallpaperBrowserPage: View {
     @Environment(WallpaperRepository.self) private var wallpaperRepository
-    
+    @Environment(WallpaperScreenManager.self) private var wallpaperScreenManager
+
     // Action error
     @State private var showError = false
     @State private var errorMessage = ""
 
     // Crud Actions
+    @State private var showSelectWallpaperSheet = false
     @State private var showAddWallpaperSheet = false
     @State private var showRemoveWallpaperSheet = false
     @State private var showEditWallpaperSheet = false
@@ -38,13 +38,13 @@ struct WallpaperBrowserPage: View {
         HStack(spacing: 0) {
             ScrollView {
                 WallpaperBrowserItemLayout( minimumColumnWidth: 240, spacing: 8 ) {
-                    ForEach(Array(wallpaperRepository.getWallpaperItems().enumerated()), id: \.element.id) { index, wallpaperItem in
+                    ForEach(Array(wallpaperRepository.wallpaperItems.enumerated()), id: \.element.id) { index, wallpaperItem in
                         // Place wallpaper item
                         WallpaperBrowserItem(
                             wallpaper: wallpaperItem,
                             
                             onSelect: {
-                                
+                                showSelectWallpaperSheet = true
                             },
                             
                             onEdit: {
@@ -84,6 +84,36 @@ struct WallpaperBrowserPage: View {
                     Label("Add", systemImage: "plus")
                 }
                 .labelStyle(.titleAndIcon)
+            }
+        }
+        .sheet(isPresented: $showSelectWallpaperSheet) {
+            SelectWallpaperItemSheet( wallpaperItem: wallpaperRepository.wallpaperItems[0] ) { wallpaperItemDisplayPayload in
+                do {
+                    // for each screen selected to be animated
+                    for screenID in wallpaperItemDisplayPayload.screenIDs {
+                        // convert runtime CGDirectDisplayID into persistent display UUID
+                        guard let displayUUIDRef = CGDisplayCreateUUIDFromDisplayID(screenID) else { continue }
+                        let cfBytes = CFUUIDGetUUIDBytes(displayUUIDRef.takeRetainedValue())
+                        let displayUUID = UUID(uuid: unsafeBitCast(cfBytes, to: uuid_t.self))
+                        
+                        // create a display object linking the selected wallpaper to the display
+                        let wallpaperItemDisplay = WallpaperItemDisplay(
+                            id: UUID(),
+                            displayUUID: displayUUID,
+                            wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
+                            volume: wallpaperItemDisplayPayload.volume,
+                            playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
+                        )
+                        
+                        // store display link
+                        try wallpaperRepository.addWallpaperItemDisplay(
+                            wallpaperItemDisplay: wallpaperItemDisplay
+                        )
+                    }
+                } catch {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
             }
         }
         .sheet(isPresented: $showAddWallpaperSheet) {

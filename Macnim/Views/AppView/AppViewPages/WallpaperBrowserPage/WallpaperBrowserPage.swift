@@ -9,23 +9,23 @@ import SwiftUI
 import AppKit
 
 enum WallpaperBrowserPageAction: Identifiable {
-    case add
-    case select(WallpaperItem)
-    case edit(WallpaperItem)
-    case remove(WallpaperItem)
+    case addWallpaper
+    case selectWallpaper(WallpaperItem)
+    case editWallpaper(WallpaperItem)
+    case removeWallpaper(WallpaperItem)
 
     var id: String {
         switch self {
-            case .add:
+            case .addWallpaper:
                 "add"
 
-            case .select(let wallpaperItem):
+            case .selectWallpaper(let wallpaperItem):
                 "select-\(wallpaperItem.id)"
 
-            case .edit(let wallpaperItem):
+            case .editWallpaper(let wallpaperItem):
                 "edit-\(wallpaperItem.id)"
 
-            case .remove(let wallpaperItem):
+            case .removeWallpaper(let wallpaperItem):
                 "remove-\(wallpaperItem.id)"
         }
     }
@@ -54,6 +54,86 @@ struct WallpaperBrowserPage: View {
         }
     }
     
+    private func addWallpaperItem(wallpaperItem: WallpaperItem) {
+        do {
+            try wallpaperRepository.addWallpaperItem(wallpaperItem: wallpaperItem)
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+    }
+    
+    private func editWallpaperItem(wallpaperItem: WallpaperItem) {
+        do {
+            try wallpaperRepository.editWallpaperItem(newWallpaperItem: wallpaperItem)
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+    }
+    
+    private func removeWallpaperItem(wallpaperItem: WallpaperItem) {
+        do {
+            try wallpaperRepository.removeWallpaperItem(wallpaperItemId: wallpaperItem.id)
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+    }
+    
+    private func favouriteWallpaperItem(wallpaperItem: WallpaperItem) {
+        var updatedWallpaperItem = wallpaperItem
+        
+        updatedWallpaperItem.isFavourite.toggle()
+        
+        do {
+            try wallpaperRepository.editWallpaperItem(newWallpaperItem: updatedWallpaperItem)
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+    }
+
+    private func selectWallpaperItem(wallpaperItem: WallpaperItem, wallpaperItemDisplayPayload: WallpaperItemDisplayPayload) {
+        do {
+            for screenID in wallpaperItemDisplayPayload.screenIDs {
+                guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(screenID) else {
+                    continue
+                }
+                let CFUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
+                let displayUUID = UUID(uuid: unsafeBitCast(CFUUIDBytes, to: uuid_t.self))
+                
+                let wallpaperItemDisplay = WallpaperItemDisplay(
+                    id: UUID(),
+                    displayUUID: displayUUID,
+                    wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
+                    volume: wallpaperItemDisplayPayload.volume,
+                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
+                )
+                
+                if let existingDisplay = wallpaperRepository.wallpaperItemDisplays.first(where: { $0.displayUUID == displayUUID }) {
+                    try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: existingDisplay.id)
+                }
+                
+                try wallpaperRepository.addWallpaperItemDisplay(
+                    wallpaperItemDisplay: wallpaperItemDisplay
+                )
+                
+                wallpaperScreenManager.playVideoOnScreen(
+                    displayID: screenID,
+                    videoURL: wallpaperItemDisplayPayload.wallpaperItem.videoURL
+                )
+                
+                wallpaperScreenManager.showScreen(
+                    displayID: screenID
+                )
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 0) {
             ScrollView {
@@ -64,19 +144,19 @@ struct WallpaperBrowserPage: View {
                             wallpaperItem: wallpaperItem,
                             
                             onSelect: {
-                                wallpaperBrowserPageAction = .select(wallpaperItem)
+                                wallpaperBrowserPageAction = .selectWallpaper(wallpaperItem)
                             },
                             
                             onEdit: {
-                                wallpaperBrowserPageAction = .edit(wallpaperItem)
+                                wallpaperBrowserPageAction = .editWallpaper(wallpaperItem)
                             },
                             
                             onRemove: {
-                                wallpaperBrowserPageAction = .remove(wallpaperItem)
+                                wallpaperBrowserPageAction = .removeWallpaper(wallpaperItem)
                             },
                             
                             onFavourite: {
-                                
+                                favouriteWallpaperItem(wallpaperItem: wallpaperItem)
                             }
                         )
                         
@@ -103,7 +183,7 @@ struct WallpaperBrowserPage: View {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     // Add wallpaper
-                    wallpaperBrowserPageAction = .add
+                    wallpaperBrowserPageAction = .addWallpaper
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
@@ -112,80 +192,26 @@ struct WallpaperBrowserPage: View {
         }
         .sheet(item: $wallpaperBrowserPageAction) { action in
             switch action {
-                case .add:
+                case .addWallpaper:
                     AddWallpaperItemSheet { wallpaperItem in
-                        do {
-                            try wallpaperRepository.addWallpaperItem(wallpaperItem: wallpaperItem)
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
+                        addWallpaperItem(wallpaperItem: wallpaperItem)
                     }
 
-                case .select(let wallpaperItem):
-                    SelectWallpaperItemSheet( wallpaperItem: wallpaperItem ) { wallpaperItemDisplayPayload in
-                        // Apply wallpaper
-                        do {
-                            for screenID in wallpaperItemDisplayPayload.screenIDs {
-                                guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(screenID) else {
-                                    continue
-                                }
-                                let CFUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
-                                let displayUUID = UUID(uuid: unsafeBitCast(CFUUIDBytes, to: uuid_t.self))
-                                
-                                let wallpaperItemDisplay = WallpaperItemDisplay(
-                                    id: UUID(),
-                                    displayUUID: displayUUID,
-                                    wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
-                                    volume: wallpaperItemDisplayPayload.volume,
-                                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
-                                )
-                                
-                                if let existingDisplay = wallpaperRepository.wallpaperItemDisplays.first(where: { $0.displayUUID == displayUUID }) {
-                                    try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: existingDisplay.id)
-                                }
-                                
-                                try wallpaperRepository.addWallpaperItemDisplay(
-                                    wallpaperItemDisplay: wallpaperItemDisplay
-                                )
-                                
-                                wallpaperScreenManager.playVideoOnScreen(
-                                    displayID: screenID,
-                                    videoURL: wallpaperItemDisplayPayload.wallpaperItem.videoURL
-                                )
-                                
-                                wallpaperScreenManager.showScreen(
-                                    displayID: screenID
-                                )
-                            }
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
-                    }
-
-                case .edit(let wallpaperItem):
+                case .editWallpaper(let wallpaperItem):
                     EditWallpaperItemSheet(wallpaperItem: wallpaperItem) { wallpaperItem in
-                        // Edit wallpaper
-                        do {
-                            try wallpaperRepository.editWallpaperItem(newWallpaperItem: wallpaperItem)
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
+                        editWallpaperItem(wallpaperItem: wallpaperItem)
                     }
 
-                case .remove(let wallpaperItem):
+                case .removeWallpaper(let wallpaperItem):
                     RemoveWallpaperItemSheet(wallpaperItem: wallpaperItem) {
-                        // Remove wallpaper
-                        do {
-                            try wallpaperRepository.removeWallpaperItem(wallpaperItemId: wallpaperItem.id)
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
+                        removeWallpaperItem(wallpaperItem: wallpaperItem)
                     }
-                }
+
+                case .selectWallpaper(let wallpaperItem):
+                    SelectWallpaperItemSheet( wallpaperItem: wallpaperItem ) { wallpaperItemDisplayPayload in
+                        selectWallpaperItem(wallpaperItem: wallpaperItem, wallpaperItemDisplayPayload: wallpaperItemDisplayPayload)
+                    }
+            }
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {

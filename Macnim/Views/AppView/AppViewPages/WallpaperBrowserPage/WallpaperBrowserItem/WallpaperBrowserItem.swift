@@ -82,8 +82,23 @@ struct WallpaperBrowserItem: View {
                 HStack {
                     if wallpaperIsHovered {
                         Menu {
-                            Button("Rename…", action: onEdit)
-                            Button("Delete", role: .destructive, action: onRemove)
+                            Button {
+                                onFavourite()
+                            } label: {
+                                Label(wallpaperItem.isFavourite ? "Unfavourite" : "Favourite", systemImage: wallpaperItem.isFavourite ? "star.slash" : "star")
+                            }
+
+                            Button {
+                                onEdit()
+                            } label: {
+                                Label("Rename", systemImage: "pencil")
+                            }
+
+                            Button(role: .destructive) {
+                                onRemove()
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         } label: {
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 12, weight: .semibold))
@@ -140,25 +155,6 @@ struct WallpaperBrowserItem: View {
         .onTapGesture {
             onSelect()
         }
-        .contextMenu {
-            Button {
-                onFavourite()
-            } label: {
-                Label(wallpaperItem.isFavourite ? "Unfavourite" : "Favourite", systemImage: wallpaperItem.isFavourite ? "star.slash" : "star")
-            }
-
-            Button {
-                onEdit()
-            } label: {
-                Label("Renames", systemImage: "pencil")
-            }
-
-            Button(role: .destructive) {
-                onRemove()
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        }
         .onHover { isHovered in
             wallpaperIsHovered = isHovered
         }
@@ -174,7 +170,7 @@ struct WallpaperBrowserItem: View {
         wallpaperItem: WallpaperItem(
             id: UUID(),
             name: "Aurora",
-            videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!
+            videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!,
         ),
         onSelect: {},
         onEdit: {},

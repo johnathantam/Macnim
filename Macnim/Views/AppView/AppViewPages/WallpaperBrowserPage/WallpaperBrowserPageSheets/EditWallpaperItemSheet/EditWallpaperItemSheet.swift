@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 struct EditWallpaperItemSheet: View {
     @Environment(\.dismiss) private var dismiss
 
-    private var wallpaper: WallpaperItem
+    private var wallpaperItem: WallpaperItem
 
     private var onEditWallpaperItem: (WallpaperItem) -> Void
 
@@ -22,15 +22,15 @@ struct EditWallpaperItemSheet: View {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    init(wallpaper: WallpaperItem, onEditWallpaperItem: @escaping (WallpaperItem) -> Void) {
-        self.wallpaper = wallpaper
+    init(wallpaperItem: WallpaperItem, onEditWallpaperItem: @escaping (WallpaperItem) -> Void) {
+        self.wallpaperItem = wallpaperItem
         self.onEditWallpaperItem = onEditWallpaperItem
         
-        _name = State(initialValue: wallpaper.name)
+        _name = State(initialValue: wallpaperItem.name)
     }
 
     private func saveWallpaper() {
-        var updatedWallpaper = wallpaper
+        var updatedWallpaper = wallpaperItem
         updatedWallpaper.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         onEditWallpaperItem(updatedWallpaper)
@@ -47,7 +47,7 @@ struct EditWallpaperItemSheet: View {
 
             // Video preview — display only, not editable
             EditWallpaperVideoPreview(
-                videoURL: wallpaper.videoURL,
+                videoURL: wallpaperItem.videoURL,
                 muted: true,
                 playbackSpeed: 1.00
             )
@@ -96,7 +96,7 @@ struct EditWallpaperItemSheet: View {
 
 #Preview {
     EditWallpaperItemSheet(
-        wallpaper: WallpaperItem(
+        wallpaperItem: WallpaperItem(
             id: UUID(),
             name: "Aurora",
             videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!

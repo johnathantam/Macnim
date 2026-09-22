@@ -8,19 +8,39 @@
 import SwiftUI
 import AppKit
 
+enum WallpaperBrowserPageAction: Identifiable {
+    case add
+    case select(WallpaperItem)
+    case edit(WallpaperItem)
+    case remove(WallpaperItem)
+
+    var id: String {
+        switch self {
+            case .add:
+                "add"
+
+            case .select(let wallpaperItem):
+                "select-\(wallpaperItem.id)"
+
+            case .edit(let wallpaperItem):
+                "edit-\(wallpaperItem.id)"
+
+            case .remove(let wallpaperItem):
+                "remove-\(wallpaperItem.id)"
+        }
+    }
+}
+
 struct WallpaperBrowserPage: View {
     @Environment(WallpaperRepository.self) private var wallpaperRepository
     @Environment(WallpaperScreenManager.self) private var wallpaperScreenManager
+    
+    // Browser page action state
+    @State private var wallpaperBrowserPageAction: WallpaperBrowserPageAction?
 
-    // Action error
+    // Brwoser action error
     @State private var showError = false
     @State private var errorMessage = ""
-
-    // Crud Actions
-    @State private var showSelectWallpaperSheet = false
-    @State private var showAddWallpaperSheet = false
-    @State private var showRemoveWallpaperSheet = false
-    @State private var showEditWallpaperSheet = false
     
     // Search filter section
     @State private var searchText: String = ""
@@ -44,15 +64,15 @@ struct WallpaperBrowserPage: View {
                             wallpaper: wallpaperItem,
                             
                             onSelect: {
-                                showSelectWallpaperSheet = true
+                                wallpaperBrowserPageAction = .select(wallpaperItem)
                             },
                             
                             onEdit: {
-                                showEditWallpaperSheet = true
+                                wallpaperBrowserPageAction = .edit(wallpaperItem)
                             },
                             
                             onRemove: {
-                                showRemoveWallpaperSheet = true
+                                wallpaperBrowserPageAction = .remove(wallpaperItem)
                             }
                         )
                         
@@ -79,58 +99,89 @@ struct WallpaperBrowserPage: View {
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     // Add wallpaper
-                    showAddWallpaperSheet = true
+                    wallpaperBrowserPageAction = .add
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
                 .labelStyle(.titleAndIcon)
             }
         }
-        .sheet(isPresented: $showSelectWallpaperSheet) {
-            SelectWallpaperItemSheet( wallpaperItem: wallpaperRepository.wallpaperItems[0] ) { wallpaperItemDisplayPayload in
-                do {
-                    // for each screen selected to be animated
-                    for screenID in wallpaperItemDisplayPayload.screenIDs {
-                        // convert runtime CGDirectDisplayID into persistent display UUID
-                        guard let displayUUIDRef = CGDisplayCreateUUIDFromDisplayID(screenID) else { continue }
-                        let cfBytes = CFUUIDGetUUIDBytes(displayUUIDRef.takeRetainedValue())
-                        let displayUUID = UUID(uuid: unsafeBitCast(cfBytes, to: uuid_t.self))
-                        
-                        // create a display object linking the selected wallpaper to the display
-                        let wallpaperItemDisplay = WallpaperItemDisplay(
-                            id: UUID(),
-                            displayUUID: displayUUID,
-                            wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
-                            volume: wallpaperItemDisplayPayload.volume,
-                            playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
-                        )
-                        
-                        // store display link
-                        try wallpaperRepository.addWallpaperItemDisplay(
-                            wallpaperItemDisplay: wallpaperItemDisplay
-                        )
+        .sheet(item: $wallpaperBrowserPageAction) { action in
+            switch action {
+                case .add:
+                    AddWallpaperItemSheet { wallpaperItem in
+                        do {
+                            try wallpaperRepository.addWallpaperItem(wallpaperItem: wallpaperItem)
+                        } catch {
+                            errorMessage = error.localizedDescription
+                            showError = true
+                        }
                     }
-                } catch {
-                    errorMessage = error.localizedDescription
-                    showError = true
+
+                case .select(let wallpaperItem):
+                    SelectWallpaperItemSheet( wallpaperItem: wallpaperItem ) { wallpaperItemDisplayPayload in
+                        // Apply wallpaper
+                        do {
+                            for screenID in wallpaperItemDisplayPayload.screenIDs {
+                                guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(screenID) else {
+                                    continue
+                                }
+                                let CFUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
+                                let displayUUID = UUID(uuid: unsafeBitCast(CFUUIDBytes, to: uuid_t.self))
+                                
+                                let wallpaperItemDisplay = WallpaperItemDisplay(
+                                    id: UUID(),
+                                    displayUUID: displayUUID,
+                                    wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
+                                    volume: wallpaperItemDisplayPayload.volume,
+                                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
+                                )
+                                
+                                if let existingDisplay = wallpaperRepository.wallpaperItemDisplays.first(where: { $0.displayUUID == displayUUID }) {
+                                    try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: existingDisplay.id)
+                                }
+                                
+                                try wallpaperRepository.addWallpaperItemDisplay(
+                                    wallpaperItemDisplay: wallpaperItemDisplay
+                                )
+                                
+                                wallpaperScreenManager.playVideoOnScreen(
+                                    displayID: screenID,
+                                    videoURL: wallpaperItemDisplayPayload.wallpaperItem.videoURL
+                                )
+                                
+                                wallpaperScreenManager.showScreen(
+                                    displayID: screenID
+                                )
+                            }
+                        } catch {
+                            errorMessage = error.localizedDescription
+                            showError = true
+                        }
+                    }
+
+                case .edit(let wallpaperItem):
+                    EditWallpaperItemSheet(wallpaperItem: wallpaperItem) { wallpaperItem in
+                        // Edit wallpaper
+                        do {
+                            try wallpaperRepository.editWallpaperItem(newWallpaperItem: wallpaperItem)
+                        } catch {
+                            errorMessage = error.localizedDescription
+                            showError = true
+                        }
+                    }
+
+                case .remove(let wallpaperItem):
+                    RemoveWallpaperItemSheet(wallpaperItem: wallpaperItem) {
+                        // Remove wallpaper
+                        do {
+                            try wallpaperRepository.removeWallpaperItem(wallpaperItemId: wallpaperItem.id)
+                        } catch {
+                            errorMessage = error.localizedDescription
+                            showError = true
+                        }
+                    }
                 }
-            }
-        }
-        .sheet(isPresented: $showAddWallpaperSheet) {
-            AddWallpaperItemSheet(onAddWallpaperItem: { wallpaperItem in
-                do {
-                    try wallpaperRepository.addWallpaperItem(wallpaperItem: wallpaperItem)
-                } catch {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            })
-        }
-        .sheet(isPresented: $showEditWallpaperSheet) {
-            
-        }
-        .sheet(isPresented: $showRemoveWallpaperSheet) {
-            
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {

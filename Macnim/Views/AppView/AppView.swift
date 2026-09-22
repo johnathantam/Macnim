@@ -14,11 +14,6 @@ struct AppView: View {
             AppViewSidebar()
         } detail: {
             WallpaperBrowserPage()
-//            AddWallpaperItemView(
-//                onAddWallpaperItem: { wallpaper in
-//                    print("Added: \(wallpaper.name)")
-//                }
-//            )
         }
     }
 }

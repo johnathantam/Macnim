@@ -46,9 +46,22 @@ final class WallpaperScreen {
 
         window.ignoresMouseEvents = true
         window.isMovableByWindowBackground = false
-        window.level = NSWindow.Level(
-            rawValue: Int(CGWindowLevelForKey(.desktopWindow))
-        )
+        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)))
+        // Tell AppKit this window shouldn't count as a normal app window:
+        // stays out of Cmd+` cycling, the Window menu, Mission Control's app
+        // switcher, and — critically — the "does this app have visible windows"
+        // check that Dock-icon-click reopening relies on.
+        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        window.isExcludedFromWindowsMenu = true
+        window.isReleasedWhenClosed = false
+        window.hidesOnDeactivate = false
+        window.isRestorable = false
+        
+        window.collectionBehavior = [
+            .canJoinAllSpaces,
+            .stationary,
+            .ignoresCycle
+        ]
 
         window.contentView = videoView
     }
@@ -63,6 +76,20 @@ final class WallpaperScreen {
     
     public func show() -> Void {
         window.orderFront(nil)
+
+        print("Wallpaper shown")
+        print("App windows:")
+
+        for window in NSApp.windows {
+            print(
+                " -",
+                window,
+                "visible:",
+                window.isVisible,
+                "level:",
+                window.level.rawValue
+            )
+        }
     }
     
     public func hide() -> Void {

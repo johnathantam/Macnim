@@ -31,4 +31,26 @@ final class WallpaperScreenManager {
             }
         }
     }
+    
+    public func showScreen(displayID: CGDirectDisplayID) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.show()
+                return
+            }
+        }
+    }
+
+    public func hideScreen(displayID: CGDirectDisplayID) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.hide()
+                return
+            }
+        }
+    }
 }

@@ -21,16 +21,29 @@ enum AppStartupState {
 
 @main
 struct MacnimApp: App {
+    // inject app delegation functionality
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    
+    // track startup state
     @State private var appStartupState: AppStartupState
     
     init() {
         do {
+            // settings
+            let appSettings = AppSettings()
+            
+            // app storage
+            let wallpaperRepository = try WallpaperRepository()
+            
+            // screen animator
+            let wallpaperScreenManager = try WallpaperScreenManager()
+            
             _appStartupState = State(
                 initialValue: .ready(
-                    appSettings: AppSettings(),
+                    appSettings: appSettings,
                     
-                    wallpaperRepository: try WallpaperRepository(),
-                    wallpaperManager: try WallpaperScreenManager()
+                    wallpaperRepository: wallpaperRepository,
+                    wallpaperManager: wallpaperScreenManager
                 )
             )
         } catch {

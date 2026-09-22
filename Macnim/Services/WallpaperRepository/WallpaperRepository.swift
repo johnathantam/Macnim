@@ -314,4 +314,26 @@ final class WallpaperRepository {
 
         try saveRepositoryItemDisplays()
     }
+    
+    public func editWallpaperItemDisplay(newWallpaperItemDisplay: WallpaperItemDisplay) throws {
+        // Make sure the display assignment exists
+        guard let index = wallpaperItemDisplays.firstIndex(where: {
+            $0.id == newWallpaperItemDisplay.id
+        }) else {
+            throw WallpaperRepositoryError("Wallpaper display assignment not found.")
+        }
+
+        // Make sure the wallpaper still exists
+        guard wallpaperItems.contains(where: {
+            $0.id == newWallpaperItemDisplay.wallpaperItem.id
+        }) else {
+            throw WallpaperRepositoryError("Wallpaper not found.")
+        }
+
+        // Update the display assignment
+        wallpaperItemDisplays[index] = newWallpaperItemDisplay
+
+        // Persist the change
+        try saveRepositoryItemDisplays()
+    }
 }

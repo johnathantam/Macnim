@@ -61,7 +61,7 @@ struct WallpaperBrowserPage: View {
                     ForEach(Array(wallpaperRepository.wallpaperItems.enumerated()), id: \.element.id) { index, wallpaperItem in
                         // Place wallpaper item
                         WallpaperBrowserItem(
-                            wallpaper: wallpaperItem,
+                            wallpaperItem: wallpaperItem,
                             
                             onSelect: {
                                 wallpaperBrowserPageAction = .select(wallpaperItem)
@@ -73,6 +73,10 @@ struct WallpaperBrowserPage: View {
                             
                             onRemove: {
                                 wallpaperBrowserPageAction = .remove(wallpaperItem)
+                            },
+                            
+                            onFavourite: {
+                                
                             }
                         )
                         

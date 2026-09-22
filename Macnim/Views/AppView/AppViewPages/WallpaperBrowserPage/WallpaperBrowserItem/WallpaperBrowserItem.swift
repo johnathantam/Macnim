@@ -10,11 +10,12 @@ import SwiftUI
 import AVFoundation
 
 struct WallpaperBrowserItem: View {
-    private var wallpaper: WallpaperItem
+    private var wallpaperItem: WallpaperItem
 
     private var onSelect: () -> Void
     private var onEdit: () -> Void
     private var onRemove: () -> Void
+    private var onFavourite: () -> Void
 
     @State private var wallpaperThumbnail: NSImage?
     @State private var wallpaperVideoDuration: String?
@@ -23,15 +24,17 @@ struct WallpaperBrowserItem: View {
     @State private var wallpaperIsSelected = false
 
     init(
-        wallpaper: WallpaperItem,
+        wallpaperItem: WallpaperItem,
         onSelect: @escaping () -> Void,
         onEdit: @escaping () -> Void,
-        onRemove: @escaping () -> Void
+        onRemove: @escaping () -> Void,
+        onFavourite: @escaping () -> Void
     ) {
-        self.wallpaper = wallpaper
+        self.wallpaperItem = wallpaperItem
         self.onSelect = onSelect
         self.onEdit = onEdit
         self.onRemove = onRemove
+        self.onFavourite = onFavourite
     }
 
     private func loadThumbnail(from url: URL, at time: CMTime = CMTime(seconds: 0.5, preferredTimescale: 600)) async -> NSImage? {
@@ -59,7 +62,7 @@ struct WallpaperBrowserItem: View {
         ZStack(alignment: .bottom) {
             if wallpaperIsHovered {
                 // Show wallpaper video preview
-                WallpaperBrowserItemVideoPreview(videoURL: wallpaper.videoURL)
+                WallpaperBrowserItemVideoPreview(videoURL: wallpaperItem.videoURL)
             } else if let wallpaperThumbnail {
                 // Show generated thumbnail
                 Image(nsImage: wallpaperThumbnail)
@@ -112,12 +115,16 @@ struct WallpaperBrowserItem: View {
             }
 
             HStack(spacing: 8) {
-                Image(systemName: wallpaperIsSelected ? "checkmark.circle.fill" : "circle")
+//                Image(systemName: wallpaperIsSelected ? "checkmark.circle.fill" : "circle")
+//                    .font(.system(size: 14))
+//                    .foregroundStyle(wallpaperIsSelected ? Color.accentColor : .secondary)
+//                    .contentTransition(.symbolEffect(.replace))
+                Image(systemName: wallpaperItem.isFavourite ? "star.fill" : "star")
                     .font(.system(size: 14))
-                    .foregroundStyle(wallpaperIsSelected ? Color.accentColor : .secondary)
+                    .foregroundStyle(wallpaperItem.isFavourite ? Color.yellow : .secondary)
                     .contentTransition(.symbolEffect(.replace))
 
-                Text(wallpaper.name)
+                Text(wallpaperItem.name)
                     .font(.system(size: 14, weight: .semibold))
                     .lineLimit(1)
             }
@@ -134,29 +141,45 @@ struct WallpaperBrowserItem: View {
             onSelect()
         }
         .contextMenu {
-            Button("Rename…", action: onEdit)
-            Button("Delete", role: .destructive, action: onRemove)
+            Button {
+                onFavourite()
+            } label: {
+                Label(wallpaperItem.isFavourite ? "Unfavourite" : "Favourite", systemImage: wallpaperItem.isFavourite ? "star.slash" : "star")
+            }
+
+            Button {
+                onEdit()
+            } label: {
+                Label("Renames", systemImage: "pencil")
+            }
+
+            Button(role: .destructive) {
+                onRemove()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
         }
         .onHover { isHovered in
             wallpaperIsHovered = isHovered
         }
         .task {
-            wallpaperThumbnail = await loadThumbnail(from: wallpaper.videoURL)
-            wallpaperVideoDuration = await loadDuration(from: wallpaper.videoURL)
+            wallpaperThumbnail = await loadThumbnail(from: wallpaperItem.videoURL)
+            wallpaperVideoDuration = await loadDuration(from: wallpaperItem.videoURL)
         }
     }
 }
 
 #Preview {
     WallpaperBrowserItem(
-        wallpaper: WallpaperItem(
+        wallpaperItem: WallpaperItem(
             id: UUID(),
             name: "Aurora",
             videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!
         ),
         onSelect: {},
         onEdit: {},
-        onRemove: {}
+        onRemove: {},
+        onFavourite: {}
     )
     .frame(width: 240)
     .padding()

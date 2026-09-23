@@ -8,12 +8,35 @@
 
 import SwiftUI
 
+enum AppPageState {
+    case wallpapers
+    case favourites
+    case displays
+    case settings
+}
+
 struct AppView: View {
+    @State private var selectedPage: AppPageState = .wallpapers
+
     var body: some View {
         NavigationSplitView {
-            AppViewSidebar()
+            AppViewSidebar(
+                selectedPage: $selectedPage
+            )
         } detail: {
-            WallpaperBrowserPage()
+            switch selectedPage {
+                case .wallpapers:
+                    WallpaperBrowserPage()
+
+                case .favourites:
+                    Text("Hello")
+
+                case .displays:
+                    WallpaperDisplayPage()
+
+                case .settings:
+                    Text("Hello")
+                }
         }
     }
 }

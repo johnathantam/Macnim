@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AppViewSidebar: View {
-    @State private var selectedItem = "Wallpapers"
+    @Binding var selectedPage: AppPageState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -25,25 +25,37 @@ struct AppViewSidebar: View {
             AppViewSidebarItem(
                 title: "Wallpapers",
                 systemImage: "square.grid.2x2",
-                isSelected: selectedItem == "Wallpapers"
+                isSelected: selectedPage == .wallpapers
             ) {
-                selectedItem = "Wallpapers"
+                selectedPage = .wallpapers
             }
 
             AppViewSidebarItem(
                 title: "Favourites",
                 systemImage: "star",
-                isSelected: selectedItem == "Favourites"
+                isSelected: selectedPage == .favourites
             ) {
-                selectedItem = "Favourites"
+                selectedPage = .favourites
             }
+            
+            Spacer()
+                .frame(height: 28)
+
+            // Configuration
+            Text("DISPLAYS")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 14)
+
+            Spacer()
+                .frame(height: 10)
 
             AppViewSidebarItem(
-                title: "My Uploads",
-                systemImage: "arrow.up.circle",
-                isSelected: selectedItem == "My Uploads"
+                title: "Display Manager",
+                systemImage: "gearshape",
+                isSelected: selectedPage == .displays
             ) {
-                selectedItem = "My Uploads"
+                selectedPage = .displays
             }
 
             Spacer()
@@ -61,9 +73,9 @@ struct AppViewSidebar: View {
             AppViewSidebarItem(
                 title: "Settings",
                 systemImage: "gearshape",
-                isSelected: selectedItem == "Settings"
+                isSelected: selectedPage == .settings
             ) {
-                selectedItem = "Settings"
+                selectedPage = .settings
             }
 
             Spacer()
@@ -71,8 +83,4 @@ struct AppViewSidebar: View {
         .padding(.horizontal, 20)
         .padding(.top, 28)
     }
-}
-
-#Preview {
-    AppViewSidebar()
 }

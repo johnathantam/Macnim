@@ -5,14 +5,14 @@ struct WallpaperDisplayPage: View {
     @Environment(WallpaperScreenManager.self) private var wallpaperScreenManager
 
     @State private var selectedScreenID: CGDirectDisplayID?
-//    @State private var selectedWallpaperDisplayFitStyle: WallpaperDisplayFitStyle = .center
-    @State private var selectedWallpaperPlaybackSpeed: Double = 1.0
-    @State private var selectedWallpaperVolume: Double = 1.0
+    @State private var selectedWallpaperDisplayFitStyle: WallpaperDisplayFitStyle = .center
+    @State private var selectedWallpaperPlaybackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
+    @State private var selectedWallpaperVolume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
     
     init() {
-        // 
+        //
     }
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
@@ -53,10 +53,10 @@ struct WallpaperDisplayPage: View {
                         .foregroundStyle(.secondary)
 
                     VStack(spacing: 0) {
-//                        WallpaperDisplayFitStylePicker(
-//                            selection: $selectedWallpaperDisplayFitStyle
-//                        )
-//                        .padding(.vertical, 14)
+                        WallpaperDisplayFitStylePicker(
+                            selection: $selectedWallpaperDisplayFitStyle
+                        )
+                        .padding(.vertical, 14)
 
                         Divider()
 

@@ -11,7 +11,7 @@ struct WallpaperScreenSelector: View {
     @Binding var selectedScreenIDs: Set<CGDirectDisplayID>
 
     private let screens = WallpaperScreenOption.currentScreens()
-
+ 
     private func toggle(_ screen: WallpaperScreenOption) {
         if selectedScreenIDs.contains(screen.id) {
             // Keep at least one screen selected — an empty selection has nothing to apply to.

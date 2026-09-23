@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WallpaperDisplayFitStylePicker: View {
+struct SelectWallpaperFitStylePicker: View {
     @Binding var selection: WallpaperDisplayFitStyle
 
     var body: some View {

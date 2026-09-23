@@ -17,8 +17,10 @@ struct SelectWallpaperItemSheet: View {
     private var onApply: (WallpaperItemDisplayPayload) -> Void
 
     @State private var selectedScreenIDs: Set<CGDirectDisplayID>
-    @State private var playbackSpeed: Double = 1.0
-    @State private var volume: Double = 0.0
+    
+    @State private var fitStyle: WallpaperDisplayFitStyle = WallpaperDisplayFitStyle.fill
+    @State private var playbackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
+    @State private var volume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
 
     private var canApply: Bool {
         !selectedScreenIDs.isEmpty
@@ -38,6 +40,7 @@ struct SelectWallpaperItemSheet: View {
             WallpaperItemDisplayPayload(
                 wallpaperItem: wallpaperItem,
                 screenIDs: selectedScreenIDs,
+                fitStyle: fitStyle,
                 playbackSpeed: playbackSpeed,
                 volume: volume
             )
@@ -62,6 +65,7 @@ struct SelectWallpaperItemSheet: View {
                 
                 VStack(alignment: .leading, spacing: 24) {
                     WallpaperScreenSelector(selectedScreenIDs: $selectedScreenIDs)
+                    SelectWallpaperFitStylePicker(selection: $fitStyle)
                     WallpaperPlaybackSpeedSelector(playbackSpeed: $playbackSpeed)
                     WallpaperVolumeSelector(volume: $volume)
                 }

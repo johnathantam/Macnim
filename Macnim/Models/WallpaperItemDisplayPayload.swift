@@ -12,6 +12,8 @@ import Foundation
 struct WallpaperItemDisplayPayload: Codable {
     var wallpaperItem: WallpaperItem
     var screenIDs: Set<CGDirectDisplayID>
-    var playbackSpeed: Double
-    var volume: Double
+    
+    var fitStyle: WallpaperDisplayFitStyle
+    var playbackSpeed: WallpaperDisplayPlaybackSpeed
+    var volume: WallpaperDisplayVolume
 }

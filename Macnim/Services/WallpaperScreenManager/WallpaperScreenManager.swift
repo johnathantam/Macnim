@@ -32,6 +32,10 @@ final class WallpaperScreenManager {
         }
     }
     
+    public func pauseVideoOnScreen(displayID: CGDirectDisplayID) -> Void {
+        
+    }
+    
     public func showScreen(displayID: CGDirectDisplayID) -> Void {
         // find the screen
         for wallpaperScreen in wallpaperScreens {

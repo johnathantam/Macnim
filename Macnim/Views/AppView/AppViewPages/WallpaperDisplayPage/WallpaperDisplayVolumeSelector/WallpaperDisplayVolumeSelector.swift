@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct WallpaperDisplayVolumeSelector: View {
-    @Binding var volume: Double
+    @Binding var volume: WallpaperDisplayVolume
 
     private var speakerIcon: String {
-        switch volume {
+        switch volume.value {
         case 0: return "speaker.slash.fill"
         case ..<0.34: return "speaker.wave.1.fill"
         case ..<0.67: return "speaker.wave.2.fill"
@@ -25,7 +25,7 @@ struct WallpaperDisplayVolumeSelector: View {
                 Text("Volume")
                     .font(.subheadline.weight(.medium))
                 Spacer()
-                Text(volume == 0 ? "Muted" : "\(Int(volume * 100))%")
+                Text(volume.value == 0 ? "Muted" : "\(Int(volume.value * 100))%")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -37,7 +37,7 @@ struct WallpaperDisplayVolumeSelector: View {
                     .frame(width: 16)
                     .contentTransition(.symbolEffect(.replace))
 
-                Slider(value: $volume, in: 0...1)
+                Slider(value: $volume.value, in: 0...1)
             }
         }
         .animation(.easeOut(duration: 0.15), value: volume)

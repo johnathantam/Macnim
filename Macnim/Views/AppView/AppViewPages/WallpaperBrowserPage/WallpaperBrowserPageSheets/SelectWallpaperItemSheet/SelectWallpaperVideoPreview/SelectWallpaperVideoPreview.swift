@@ -11,11 +11,17 @@ import AVKit
 /// Looping preview reflecting the in-progress speed/volume settings live, before Apply is tapped.
 struct SelectWallpaperVideoPreview: View {
     let videoURL: URL
-    let playbackSpeed: Double
-    let volume: Double
+    let playbackSpeed: WallpaperDisplayPlaybackSpeed
+    let volume: WallpaperDisplayVolume
 
     @State private var player: AVPlayer?
     @State private var loopObserver: NSObjectProtocol?
+    
+    init(videoURL: URL, playbackSpeed: WallpaperDisplayPlaybackSpeed, volume: WallpaperDisplayVolume) {
+        self.videoURL = videoURL
+        self.playbackSpeed = playbackSpeed
+        self.volume = volume
+    }
 
     var body: some View {
         Group {
@@ -34,8 +40,8 @@ struct SelectWallpaperVideoPreview: View {
         .onAppear {
             let item = AVPlayerItem(url: videoURL)
             let newPlayer = AVPlayer(playerItem: item)
-            newPlayer.volume = Float(volume)
-            newPlayer.rate = Float(playbackSpeed)
+            newPlayer.volume = Float(volume.value)
+            newPlayer.rate = Float(playbackSpeed.rawValue)
             newPlayer.play()
 
             loopObserver = NotificationCenter.default.addObserver(
@@ -44,16 +50,16 @@ struct SelectWallpaperVideoPreview: View {
                 queue: .main
             ) { _ in
                 newPlayer.seek(to: .zero)
-                newPlayer.rate = Float(playbackSpeed)
+                newPlayer.rate = Float(playbackSpeed.rawValue)
             }
 
             player = newPlayer
         }
         .onChange(of: playbackSpeed) { _, newValue in
-            player?.rate = Float(newValue)
+            player?.rate = Float(newValue.rawValue)
         }
         .onChange(of: volume) { _, newValue in
-            player?.volume = Float(newValue)
+            player?.volume = Float(newValue.value)
         }
         .onDisappear {
             player?.pause()

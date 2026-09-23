@@ -56,7 +56,6 @@ final class WallpaperScreen {
         window.isReleasedWhenClosed = false
         window.hidesOnDeactivate = false
         window.isRestorable = false
-        
         window.collectionBehavior = [
             .canJoinAllSpaces,
             .stationary,

@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct WallpaperDisplayPlaybackSpeedSelector: View {
-    @Binding var playbackSpeed: Double
-
-    private static let options: [Double] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0]
+    @Binding var playbackSpeed: WallpaperDisplayPlaybackSpeed
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -20,15 +18,14 @@ struct WallpaperDisplayPlaybackSpeedSelector: View {
                 
                 Spacer()
                 
-                Text(playbackSpeed.formatted(.number.precision(.fractionLength(0...2))) + "×")
+                Text(playbackSpeed.title)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             Picker("Playback Speed", selection: $playbackSpeed) {
-                ForEach(Self.options, id: \.self) { speed in
-                    Text(speed.formatted(.number.precision(.fractionLength(0...2))) + "×")
-                        .tag(speed)
+                ForEach(WallpaperDisplayPlaybackSpeed.allCases) { speed in
+                    Text(speed.title)
                 }
             }
             .pickerStyle(.segmented)

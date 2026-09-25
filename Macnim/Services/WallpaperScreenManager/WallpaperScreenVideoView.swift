@@ -26,6 +26,10 @@ final class WallpaperScreenVideoView: NSView {
         fatalError("init(coder:) not implemented")
     }
     
+    func isPlaying() -> Bool {
+        return queuePlayer != nil
+    }
+    
     func play(videoURL: URL) {
         // Remove any existing video
         playerLayer?.removeFromSuperlayer()
@@ -49,6 +53,10 @@ final class WallpaperScreenVideoView: NSView {
 
         player.isMuted = true
         player.play()
+    }
+    
+    func pause() {
+        queuePlayer?.pause()
     }
 
     func clear() {

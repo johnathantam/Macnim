@@ -9,10 +9,6 @@ struct WallpaperDisplayPage: View {
     @State private var selectedWallpaperPlaybackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
     @State private var selectedWallpaperVolume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
     
-    init() {
-        //
-    }
-    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
@@ -85,10 +81,6 @@ struct WallpaperDisplayPage: View {
             .padding(.vertical, 28)
         }
     }
-}
-
-#Preview {
-    WallpaperDisplayPage()
 }
 
 #Preview {

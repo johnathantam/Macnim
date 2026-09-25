@@ -15,10 +15,12 @@ final class WallpaperScreenManager {
     init() throws {
         // loop through every screen and attach a wallpaper view
         for screen in NSScreen.screens {
-            wallpaperScreens.append(
-                try WallpaperScreen(screen: screen)
-            )
+            wallpaperScreens.append(try WallpaperScreen(screen: screen))
         }
+    }
+    
+    public func getScreens() -> [WallpaperScreen] {
+        return self.wallpaperScreens
     }
     
     public func playVideoOnScreen(displayID: CGDirectDisplayID, videoURL: URL) -> Void {
@@ -33,7 +35,14 @@ final class WallpaperScreenManager {
     }
     
     public func pauseVideoOnScreen(displayID: CGDirectDisplayID) -> Void {
-        
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // pause the video
+                wallpaperScreen.pauseVideo()
+                return
+            }
+        }
     }
     
     public func showScreen(displayID: CGDirectDisplayID) -> Void {

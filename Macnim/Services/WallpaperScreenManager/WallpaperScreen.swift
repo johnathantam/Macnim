@@ -20,12 +20,12 @@ struct WallpaperScreenError: LocalizedError {
     }
 }
 
-final class WallpaperScreen {
+final class WallpaperScreen: Identifiable {
     private var screen: NSScreen
     private var displayID: CGDirectDisplayID
     private var window: NSWindow
     private var videoView: WallpaperScreenVideoView
-
+    
     init(screen: NSScreen) throws {
         self.screen = screen
         
@@ -68,27 +68,33 @@ final class WallpaperScreen {
     public func getDisplayID() -> CGDirectDisplayID {
         return self.displayID
     }
+    
+    public func getFrame() -> NSRect {
+        return self.screen.frame
+    }
+    
+    public func getLocalizedName() -> String {
+        return self.screen.localizedName
+    }
+    
+    public func isMain() -> Bool {
+        return self.screen == NSScreen.main
+    }
+    
+    public func isActive() -> Bool {
+        return self.videoView.isPlaying()
+    }
 
     public func playVideo(videoURL: URL) -> Void {
         videoView.play(videoURL: videoURL)
     }
     
+    public func pauseVideo() -> Void {
+        videoView.pause()
+    }
+    
     public func show() -> Void {
         window.orderFront(nil)
-
-        print("Wallpaper shown")
-        print("App windows:")
-
-        for window in NSApp.windows {
-            print(
-                " -",
-                window,
-                "visible:",
-                window.isVisible,
-                "level:",
-                window.level.rawValue
-            )
-        }
     }
     
     public func hide() -> Void {

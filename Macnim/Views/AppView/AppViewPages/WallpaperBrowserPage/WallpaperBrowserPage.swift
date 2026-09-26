@@ -46,10 +46,10 @@ struct WallpaperBrowserPage: View {
     @State private var searchText: String = ""
     private var searchedWallpaperItems: [WallpaperItem] {
         guard !searchText.isEmpty else {
-            return wallpaperRepository.wallpaperItems
+            return wallpaperRepository.getWallpaperItems()
         }
         
-        return wallpaperRepository.wallpaperItems.filter {
+        return wallpaperRepository.getWallpaperItems().filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -111,7 +111,7 @@ struct WallpaperBrowserPage: View {
                     playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
                 )
                 
-                if let existingDisplay = wallpaperRepository.wallpaperItemDisplays.first(where: { $0.displayUUID == displayUUID }) {
+                if let existingDisplay = wallpaperRepository.getWallpaperItemDisplays().first(where: { $0.displayUUID == displayUUID }) {
                     try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: existingDisplay.id)
                 }
                 
@@ -138,7 +138,7 @@ struct WallpaperBrowserPage: View {
         HStack(spacing: 0) {
             ScrollView {
                 WallpaperBrowserItemLayout( minimumColumnWidth: 240, spacing: 8 ) {
-                    ForEach(Array(wallpaperRepository.wallpaperItems.enumerated()), id: \.element.id) { index, wallpaperItem in
+                    ForEach(Array(wallpaperRepository.getWallpaperItems().enumerated()), id: \.element.id) { index, wallpaperItem in
                         // Place wallpaper item
                         WallpaperBrowserItem(
                             wallpaperItem: wallpaperItem,

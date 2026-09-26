@@ -77,6 +77,30 @@ final class WallpaperScreen: Identifiable {
         return self.screen.localizedName
     }
     
+    public func getFitStyle() -> WallpaperDisplayFitStyle {
+        return videoView.getFitStyle()
+    }
+
+    public func setFitStyle(newFitStyle: WallpaperDisplayFitStyle) {
+        videoView.setFitStyle(newFitStyle: newFitStyle)
+    }
+
+    public func getVolume() -> WallpaperDisplayVolume {
+        return videoView.getVolume()
+    }
+
+    public func setVolume(newVolume: WallpaperDisplayVolume) {
+        videoView.setVolume(newVolume: newVolume)
+    }
+
+    public func getPlaybackSpeed() -> WallpaperDisplayPlaybackSpeed {
+        return videoView.getPlaybackSpeed()
+    }
+
+    public func setPlaybackSpeed(newPlaybackSpeed: WallpaperDisplayPlaybackSpeed) {
+        videoView.setPlaybackSpeed(newPlaybackSpeed: newPlaybackSpeed)
+    }
+    
     public func isMain() -> Bool {
         return self.screen == NSScreen.main
     }

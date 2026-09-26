@@ -23,6 +23,39 @@ final class WallpaperScreenManager {
         return self.wallpaperScreens
     }
     
+    public func setFitStyleOnScreen(displayID: CGDirectDisplayID, newFitStyle: WallpaperDisplayFitStyle) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.setFitStyle(newFitStyle: newFitStyle)
+                return
+            }
+        }
+    }
+    
+    public func setPlaybackSpeedOnScreen(displayID: CGDirectDisplayID, newPlaybackSpeed: WallpaperDisplayPlaybackSpeed) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.setPlaybackSpeed(newPlaybackSpeed: newPlaybackSpeed)
+                return
+            }
+        }
+    }
+    
+    public func setVolumeOnScreen(displayID: CGDirectDisplayID, newVolume: WallpaperDisplayVolume) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.setVolume(newVolume: newVolume)
+                return
+            }
+        }
+    }
+
     public func playVideoOnScreen(displayID: CGDirectDisplayID, videoURL: URL) -> Void {
         // find the screen
         for wallpaperScreen in wallpaperScreens {

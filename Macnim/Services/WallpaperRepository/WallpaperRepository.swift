@@ -28,9 +28,9 @@ final class WallpaperRepository {
     private let wallpaperRepositoryItemDisplaysFile: URL
     
     // List of wallpaper items stored
-    private(set) var wallpaperItems: [WallpaperItem] = []
+    private var wallpaperItems: [WallpaperItem] = []
     // List of currently displayed wallpapers
-    private(set) var wallpaperItemDisplays: [WallpaperItemDisplay] = []
+    private var wallpaperItemDisplays: [WallpaperItemDisplay] = []
 
     init() throws {
         // Resolve ~/Library/Application Support
@@ -222,6 +222,14 @@ final class WallpaperRepository {
                 "Could not save wallpaper display assignments."
             )
         }
+    }
+    
+    public func getWallpaperItems() -> [WallpaperItem] {
+        return wallpaperItems
+    }
+    
+    public func getWallpaperItemDisplays() -> [WallpaperItemDisplay] {
+        return wallpaperItemDisplays
     }
     
     public func addWallpaperItem(wallpaperItem: WallpaperItem) throws {

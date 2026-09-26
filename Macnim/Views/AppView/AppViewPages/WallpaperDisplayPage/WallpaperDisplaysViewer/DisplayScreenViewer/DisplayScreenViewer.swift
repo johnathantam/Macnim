@@ -50,7 +50,6 @@ struct DisplayScreenViewer: View {
             }
         }
         .buttonStyle(.plain)
-        .cursorHoverPointer()
         .onHover { hovering in
             withAnimation(.easeOut(duration: 0.15)) {
                 isHovering = hovering
@@ -66,6 +65,9 @@ struct DisplayScreenViewer: View {
         }
         .accessibilityLabel(
             "\(screen.getLocalizedName()), \(screen.isActive() ? "wallpaper active" : "no signal")\(isSelected ? ", selected" : "")"
+        )
+        .disabled(
+            screen.isActive() == false
         )
     }
 
@@ -136,7 +138,7 @@ struct DisplayScreenViewer: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.white.opacity(0.7))
 
-                Text("No Signal")
+                Text("Not animating")
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.6))
                     .tracking(0.5)

@@ -78,6 +78,17 @@ final class WallpaperScreenManager {
         }
     }
     
+    public func clearVideoOnScreen(displayID: CGDirectDisplayID) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // pause the video
+                wallpaperScreen.clearVideo()
+                return
+            }
+        }
+    }
+    
     public func showScreen(displayID: CGDirectDisplayID) -> Void {
         // find the screen
         for wallpaperScreen in wallpaperScreens {

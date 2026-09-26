@@ -34,7 +34,8 @@ struct WallpaperDisplayPage: View {
             wallpaperScreenManager.setPlaybackSpeedOnScreen(displayID: selectedScreenID, newPlaybackSpeed: selectedWallpaperPlaybackSpeed)
             wallpaperScreenManager.setVolumeOnScreen(displayID: selectedScreenID, newVolume: selectedWallpaperVolume)
         } catch {
-            
+            showError = true
+            errorMessage = error.localizedDescription
         }
     }
     
@@ -65,6 +66,63 @@ struct WallpaperDisplayPage: View {
             
             // save display
             try wallpaperRepository.editWallpaperItemDisplay(newWallpaperItemDisplay: newDisplay)
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    private func clearWallpaperDisplay() -> Void {
+        do {
+            guard let selectedScreenID else {
+                throw(WallpaperDisplayError("No screen selected"))
+            }
+            
+            // create CFUUID for the given screen then convert it to a UUID
+            guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(selectedScreenID) else {
+                return
+            }
+            let cfUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
+            let displayUUID = UUID(uuid: unsafeBitCast(cfUUIDBytes, to: uuid_t.self))
+            
+            // use UUID to fetch a copy of the current display
+            guard let currentDisplay = wallpaperRepository.getWallpaperItemDisplays().first(
+                where: { $0.displayUUID == displayUUID }
+            ) else {
+                throw(WallpaperDisplayError("Could not find current display"))
+            }
+
+            wallpaperScreenManager.clearVideoOnScreen(displayID: selectedScreenID)
+            wallpaperScreenManager.hideScreen(displayID: selectedScreenID)
+            try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: currentDisplay.id)
+            
+            // Nothing should remain selected
+            self.selectedScreenID = nil
+        } catch {
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    private func clearWallpaperDisplays() {
+        do {
+            // Clear every active wallpaper screen
+            for wallpaperScreen in wallpaperScreenManager.getScreens() {
+                let displayID = wallpaperScreen.getDisplayID()
+
+                wallpaperScreenManager.clearVideoOnScreen(displayID: displayID)
+                wallpaperScreenManager.hideScreen(displayID: displayID)
+            }
+
+            // Remove every saved display assignment
+            for wallpaperDisplay in wallpaperRepository.getWallpaperItemDisplays() {
+                try wallpaperRepository.removeWallpaperItemDisplay(
+                    wallpaperItemDisplayId: wallpaperDisplay.id
+                )
+            }
+
+            // Nothing should remain selected
+            selectedScreenID = nil
         } catch {
             showError = true
             errorMessage = error.localizedDescription
@@ -126,7 +184,11 @@ struct WallpaperDisplayPage: View {
                             onApply: {
                                 applyWallpaperDisplay()
                                 saveWallpaperDisplay()
-                            }
+                            },
+                            
+                            onClear: {
+                                clearWallpaperDisplay()
+                            },
                         )
                     }
                     .padding(.horizontal, 16)

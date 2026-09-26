@@ -117,6 +117,10 @@ final class WallpaperScreen: Identifiable {
         videoView.pause()
     }
     
+    public func clearVideo() -> Void {
+        videoView.clear()
+    }
+    
     public func show() -> Void {
         window.orderFront(nil)
     }

@@ -30,19 +30,6 @@ struct WallpaperFavouritesBrowserPage: View {
             )
         }
     }
-    
-    private func favouriteWallpaperItem(wallpaperItem: WallpaperItem) {
-        var updatedWallpaperItem = wallpaperItem
-        
-        updatedWallpaperItem.isFavourite.toggle()
-        
-        do {
-            try wallpaperRepository.editWallpaperItem(newWallpaperItem: updatedWallpaperItem)
-        } catch {
-            errorMessage = error.localizedDescription
-            showError = true
-        }
-    }
 
     private func selectWallpaperItem(wallpaperItem: WallpaperItem, wallpaperItemDisplayPayload: WallpaperItemDisplayPayload) {
         do {
@@ -57,8 +44,9 @@ struct WallpaperFavouritesBrowserPage: View {
                     id: UUID(),
                     displayUUID: displayUUID,
                     wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
+                    fitStyle: wallpaperItemDisplayPayload.fitStyle,
+                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed,
                     volume: wallpaperItemDisplayPayload.volume,
-                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
                 )
                 
                 if let existingDisplay = wallpaperRepository.getWallpaperItemDisplays().first(where: { $0.displayUUID == displayUUID }) {

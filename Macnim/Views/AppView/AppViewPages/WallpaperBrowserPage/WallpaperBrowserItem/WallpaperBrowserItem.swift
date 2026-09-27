@@ -19,6 +19,7 @@ struct WallpaperBrowserItem: View {
 
     @State private var wallpaperThumbnail: NSImage?
     @State private var wallpaperVideoDuration: String?
+    @State private var wallpaperAspectRatio: CGFloat?
 
     @State private var wallpaperIsHovered = false
     @State private var wallpaperIsSelected = false
@@ -57,6 +58,28 @@ struct WallpaperBrowserItem: View {
         let totalSeconds = Int(seconds.rounded())
         return String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60)
     }
+    
+    private func loadAspectRatio(from videoURL: URL) async -> CGFloat? {
+        let asset = AVURLAsset(url: videoURL)
+        guard let track = try? await asset.loadTracks(withMediaType: .video).first else {
+            return 16.0 / 9.0
+        }
+        guard let naturalSize = try? await track.load(.naturalSize),
+              let preferredTransform = try? await track.load(.preferredTransform) else {
+            return 16.0 / 9.0
+        }
+
+        // Apply the transform so rotated (e.g. portrait-recorded) video reports correct orientation
+        let transformedSize = naturalSize.applying(preferredTransform)
+        let width = abs(transformedSize.width)
+        let height = abs(transformedSize.height)
+
+        guard width > 0, height > 0 else {
+            return 16.0 / 9.0
+        }
+        
+        return width / height
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -70,11 +93,8 @@ struct WallpaperBrowserItem: View {
                     .scaledToFill()
                     .clipped()
             } else {
-                // Placeholder while generating (or if it failed)
-                Image("test-thumbnail")
-                    .resizable()
-                    .scaledToFill()
-                    .clipped()
+                // Show empty view for failed thumbnail fetch
+                WallpaperBrowserItemEmptyThumbnailView()
             }
 
             // Top overlay row: overflow menu (leading) + duration badge (trailing)
@@ -130,13 +150,9 @@ struct WallpaperBrowserItem: View {
             }
 
             HStack(spacing: 8) {
-//                Image(systemName: wallpaperIsSelected ? "checkmark.circle.fill" : "circle")
-//                    .font(.system(size: 14))
-//                    .foregroundStyle(wallpaperIsSelected ? Color.accentColor : .secondary)
-//                    .contentTransition(.symbolEffect(.replace))
                 Image(systemName: wallpaperItem.isFavourite ? "star.fill" : "star")
                     .font(.system(size: 14))
-                    .foregroundStyle(wallpaperItem.isFavourite ? Color.yellow : .secondary)
+                    .foregroundStyle(wallpaperItem.isFavourite ? Color.blue : .secondary)
                     .contentTransition(.symbolEffect(.replace))
 
                 Text(wallpaperItem.name)
@@ -149,7 +165,7 @@ struct WallpaperBrowserItem: View {
             .frame(maxWidth: .infinity, alignment: .bottomLeading)
             .padding(8)
         }
-        .aspectRatio(16 / 9, contentMode: .fit)
+        .aspectRatio(wallpaperAspectRatio, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .contentShape(RoundedRectangle(cornerRadius: 14))
         .onTapGesture {
@@ -161,6 +177,9 @@ struct WallpaperBrowserItem: View {
         .task {
             wallpaperThumbnail = await loadThumbnail(from: wallpaperItem.videoURL)
             wallpaperVideoDuration = await loadDuration(from: wallpaperItem.videoURL)
+            if let ratio = await loadAspectRatio(from: wallpaperItem.videoURL) {
+                wallpaperAspectRatio = ratio
+            }
         }
     }
 }

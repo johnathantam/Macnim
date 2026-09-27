@@ -37,6 +37,11 @@ final class WallpaperScreenVideoView: NSView {
     public func setFitStyle(newFitStyle: WallpaperDisplayFitStyle) -> Void {
         fitStyle = newFitStyle
         playerLayer?.videoGravity = newFitStyle.videoGravity
+        if let videoSize = queuePlayer?.currentItem?.presentationSize {
+            print("gravity: \(newFitStyle.videoGravity.rawValue), layer bounds: \(bounds.size), video native size: \(videoSize)")
+        } else {
+            print("gravity: \(newFitStyle.videoGravity.rawValue), layer bounds: \(bounds.size), video native size: NOT YET AVAILABLE")
+        }
     }
     
     public func getVolume() -> WallpaperDisplayVolume {

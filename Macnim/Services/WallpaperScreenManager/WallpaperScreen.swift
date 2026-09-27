@@ -38,7 +38,7 @@ final class WallpaperScreen: Identifiable {
         self.displayID = displayID
         self.videoView = WallpaperScreenVideoView()
         self.window = NSWindow(
-            contentRect: .zero,
+            contentRect: screen.frame,
             styleMask: [.borderless],
             backing: .buffered,
             defer: false,
@@ -46,7 +46,6 @@ final class WallpaperScreen: Identifiable {
         )
         
         window.setFrame(screen.frame, display: false)
-        videoView.autoresizingMask = [.width, .height]
 
         window.ignoresMouseEvents = true
         window.isMovableByWindowBackground = false

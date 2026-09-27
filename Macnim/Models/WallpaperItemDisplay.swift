@@ -103,6 +103,6 @@ struct WallpaperItemDisplay: Identifiable, Codable {
     let wallpaperItem: WallpaperItem
     
     var fitStyle: WallpaperDisplayFitStyle = WallpaperDisplayFitStyle.fill
-    var volume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
     var playbackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
+    var volume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
 }

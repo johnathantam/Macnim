@@ -16,6 +16,7 @@ struct WallpaperFavouritesBrowserItem: View {
 
     @State private var wallpaperThumbnail: NSImage?
     @State private var wallpaperVideoDuration: String?
+    @State private var wallpaperAspectRatio: CGFloat?
 
     @State private var wallpaperIsHovered = false
     @State private var wallpaperIsSelected = false
@@ -48,6 +49,28 @@ struct WallpaperFavouritesBrowserItem: View {
         let totalSeconds = Int(seconds.rounded())
         return String(format: "%d:%02d", totalSeconds / 60, totalSeconds % 60)
     }
+    
+    private func loadAspectRatio(from videoURL: URL) async -> CGFloat? {
+        let asset = AVURLAsset(url: videoURL)
+        guard let track = try? await asset.loadTracks(withMediaType: .video).first else {
+            return 16.0 / 9.0
+        }
+        guard let naturalSize = try? await track.load(.naturalSize),
+              let preferredTransform = try? await track.load(.preferredTransform) else {
+            return 16.0 / 9.0
+        }
+
+        // Apply the transform so rotated (e.g. portrait-recorded) video reports correct orientation
+        let transformedSize = naturalSize.applying(preferredTransform)
+        let width = abs(transformedSize.width)
+        let height = abs(transformedSize.height)
+
+        guard width > 0, height > 0 else {
+            return 16.0 / 9.0
+        }
+        
+        return width / height
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -62,15 +85,14 @@ struct WallpaperFavouritesBrowserItem: View {
                     .clipped()
             } else {
                 // Placeholder while generating (or if it failed)
-                Image("test-thumbnail")
-                    .resizable()
-                    .scaledToFill()
-                    .clipped()
+                WallpaperFavouritesBrowserItemEmptyThumbnailView()
             }
 
             // Top overlay row: overflow menu (leading) + duration badge (trailing)
             VStack {
                 HStack {
+                    Spacer()
+                    
                     if wallpaperIsHovered {
                         if let wallpaperVideoDuration {
                             Text(wallpaperVideoDuration)
@@ -80,6 +102,7 @@ struct WallpaperFavouritesBrowserItem: View {
                                 .padding(.vertical, 3)
                                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
                                 .padding(8)
+                                
                         }
                     }
                 }
@@ -91,7 +114,7 @@ struct WallpaperFavouritesBrowserItem: View {
             HStack(spacing: 8) {
                 Image(systemName: wallpaperFavouriteItem.isFavourite ? "star.fill" : "star")
                     .font(.system(size: 14))
-                    .foregroundStyle(wallpaperFavouriteItem.isFavourite ? Color.yellow : .secondary)
+                    .foregroundStyle(wallpaperFavouriteItem.isFavourite ? Color.blue : .secondary)
                     .contentTransition(.symbolEffect(.replace))
 
                 Text(wallpaperFavouriteItem.name)
@@ -104,7 +127,7 @@ struct WallpaperFavouritesBrowserItem: View {
             .frame(maxWidth: .infinity, alignment: .bottomLeading)
             .padding(8)
         }
-        .aspectRatio(16 / 9, contentMode: .fit)
+        .aspectRatio(wallpaperAspectRatio, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .contentShape(RoundedRectangle(cornerRadius: 14))
         .onTapGesture {
@@ -116,21 +139,21 @@ struct WallpaperFavouritesBrowserItem: View {
         .task {
             wallpaperThumbnail = await loadThumbnail(from: wallpaperFavouriteItem.videoURL)
             wallpaperVideoDuration = await loadDuration(from: wallpaperFavouriteItem.videoURL)
+            if let ratio = await loadAspectRatio(from: wallpaperFavouriteItem.videoURL) {
+                wallpaperAspectRatio = ratio
+            }
         }
     }
 }
 
 #Preview {
-    WallpaperBrowserItem(
-        wallpaperItem: WallpaperItem(
+    WallpaperFavouritesBrowserItem(
+        wallpaperFavouriteItem: WallpaperItem(
             id: UUID(),
             name: "Aurora",
             videoURL: Bundle.main.url(forResource: "test-wallpaper", withExtension: "mp4")!,
         ),
         onSelect: {},
-        onEdit: {},
-        onRemove: {},
-        onFavourite: {}
     )
     .frame(width: 240)
     .padding()

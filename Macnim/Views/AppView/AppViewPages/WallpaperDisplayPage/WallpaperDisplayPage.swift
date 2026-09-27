@@ -43,7 +43,7 @@ struct WallpaperDisplayPage: View {
         else {
             return
         }
-
+        
         selectedWallpaperDisplayFitStyle = selectedDisplay.fitStyle
         selectedWallpaperPlaybackSpeed = selectedDisplay.playbackSpeed
         selectedWallpaperVolume = selectedDisplay.volume

@@ -107,8 +107,9 @@ struct WallpaperBrowserPage: View {
                     id: UUID(),
                     displayUUID: displayUUID,
                     wallpaperItem: wallpaperItemDisplayPayload.wallpaperItem,
+                    fitStyle: wallpaperItemDisplayPayload.fitStyle,
+                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed,
                     volume: wallpaperItemDisplayPayload.volume,
-                    playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
                 )
                 
                 if let existingDisplay = wallpaperRepository.getWallpaperItemDisplays().first(where: { $0.displayUUID == displayUUID }) {
@@ -127,6 +128,10 @@ struct WallpaperBrowserPage: View {
                 wallpaperScreenManager.showScreen(
                     displayID: screenID
                 )
+                
+                wallpaperScreenManager.setFitStyleOnScreen(displayID: screenID, newFitStyle: wallpaperItemDisplayPayload.fitStyle)
+                wallpaperScreenManager.setPlaybackSpeedOnScreen(displayID: screenID, newPlaybackSpeed: wallpaperItemDisplayPayload.playbackSpeed)
+                wallpaperScreenManager.setVolumeOnScreen(displayID: screenID, newVolume: wallpaperItemDisplayPayload.volume)
             }
         } catch {
             errorMessage = error.localizedDescription

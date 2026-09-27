@@ -10,12 +10,12 @@ import SwiftUI
 
 @Observable
 final class WallpaperScreenManager {
-    private var wallpapers: [WallpaperScreen] = []
+    private var wallpaperScreens: [WallpaperScreen] = []
 
     init() throws {
         // loop through every screen and attach a wallpaper view
         for screen in NSScreen.screens {
-            wallpapers.append(
+            wallpaperScreens.append(
                 try WallpaperScreen(screen: screen)
             )
         }
@@ -23,10 +23,36 @@ final class WallpaperScreenManager {
     
     public func playVideoOnScreen(displayID: CGDirectDisplayID, videoURL: URL) -> Void {
         // find the screen
-        for wallpaper in wallpapers {
-            if wallpaper.getDisplayID() == displayID {
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
                 // play the video
-                wallpaper.playVideo(videoURL: videoURL)
+                wallpaperScreen.playVideo(videoURL: videoURL)
+                return
+            }
+        }
+    }
+    
+    public func pauseVideoOnScreen(displayID: CGDirectDisplayID) -> Void {
+        
+    }
+    
+    public func showScreen(displayID: CGDirectDisplayID) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.show()
+                return
+            }
+        }
+    }
+
+    public func hideScreen(displayID: CGDirectDisplayID) -> Void {
+        // find the screen
+        for wallpaperScreen in wallpaperScreens {
+            if wallpaperScreen.getDisplayID() == displayID {
+                // play the video
+                wallpaperScreen.hide()
                 return
             }
         }

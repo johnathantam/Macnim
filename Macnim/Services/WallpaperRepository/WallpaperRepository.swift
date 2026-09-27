@@ -25,8 +25,12 @@ final class WallpaperRepository {
     private let wallpaperRepositoryStorageDirectory: URL
     private let wallpaperRepositoryVideosDirectory: URL
     private let wallpaperRepositoryItemsFile: URL
+    private let wallpaperRepositoryItemDisplaysFile: URL
     
+    // List of wallpaper items stored
     private(set) var wallpaperItems: [WallpaperItem] = []
+    // List of currently displayed wallpapers
+    private(set) var wallpaperItemDisplays: [WallpaperItemDisplay] = []
 
     init() throws {
         // Resolve ~/Library/Application Support
@@ -39,6 +43,8 @@ final class WallpaperRepository {
         
         // Resolve ~/Library/Application Support/Macnim/Wallpapers/walllpaperItems.json
         self.wallpaperRepositoryItemsFile = wallpaperRepositoryStorageDirectory.appendingPathComponent("wallpaperItems.json")
+        
+        self.wallpaperRepositoryItemDisplaysFile = wallpaperRepositoryStorageDirectory.appendingPathComponent("wallpaperItemDisplays.json")
         
         // Resolve ~/Library/Application Support/Macnim/Wallpapers/WallpaperVideos
         self.wallpaperRepositoryVideosDirectory = wallpaperRepositoryStorageDirectory.appendingPathComponent("WallpaperVideos", isDirectory: true)
@@ -93,6 +99,26 @@ final class WallpaperRepository {
                 )
             } catch {
                 throw WallpaperRepositoryError("Failed to create wallpaper index file.")
+            }
+        }
+        
+        // Create the wallpaper display assignments file if it doesn't exist.
+        if !fileManager.fileExists(
+            atPath: wallpaperRepositoryItemDisplaysFile.path
+        ) {
+            do {
+                let data = try JSONEncoder().encode(
+                    [WallpaperItemDisplay]()
+                )
+
+                try data.write(
+                    to: wallpaperRepositoryItemDisplaysFile,
+                    options: .atomic
+                )
+            } catch {
+                throw WallpaperRepositoryError(
+                    "Failed to create wallpaper display assignments file."
+                )
             }
         }
 
@@ -164,8 +190,38 @@ final class WallpaperRepository {
             }
     }
     
-    public func getWallpaperItems() -> [WallpaperItem] {
-        return self.wallpaperItems
+    private func loadRepositoryItemDisplays() throws -> [WallpaperItemDisplay] {
+        do {
+            let data = try Data(
+                contentsOf: wallpaperRepositoryItemDisplaysFile
+            )
+
+            return try JSONDecoder().decode(
+                [WallpaperItemDisplay].self,
+                from: data
+            )
+        } catch {
+            throw WallpaperRepositoryError(
+                "Could not load wallpaper display assignments."
+            )
+        }
+    }
+    
+    private func saveRepositoryItemDisplays() throws {
+        do {
+            let data = try JSONEncoder().encode(
+                wallpaperItemDisplays
+            )
+
+            try data.write(
+                to: wallpaperRepositoryItemDisplaysFile,
+                options: .atomic
+            )
+        } catch {
+            throw WallpaperRepositoryError(
+                "Could not save wallpaper display assignments."
+            )
+        }
     }
     
     public func addWallpaperItem(wallpaperItem: WallpaperItem) throws {
@@ -219,5 +275,65 @@ final class WallpaperRepository {
         wallpaperItems[index] = newWallpaperItem
 
         try saveRepositoryItems()
+    }
+    
+    public func addWallpaperItemDisplay(wallpaperItemDisplay: WallpaperItemDisplay) throws {
+        // Make sure this wallpaper exists
+        guard wallpaperItems.contains(where: {
+            $0.id == wallpaperItemDisplay.wallpaperItem.id
+        }) else {
+            throw WallpaperRepositoryError(
+                "Wallpaper not found."
+            )
+        }
+
+        // Make sure this display assignment doesn't already exist
+        guard !wallpaperItemDisplays.contains(where: {
+            $0.id == wallpaperItemDisplay.id
+        }) else {
+            throw WallpaperRepositoryError(
+                "Wallpaper display assignment already exists."
+            )
+        }
+
+        wallpaperItemDisplays.append(wallpaperItemDisplay)
+
+        try saveRepositoryItemDisplays()
+    }
+
+    public func removeWallpaperItemDisplay(wallpaperItemDisplayId: UUID) throws {
+        guard let index = wallpaperItemDisplays.firstIndex(where: {
+            $0.id == wallpaperItemDisplayId
+        }) else {
+            throw WallpaperRepositoryError(
+                "Wallpaper display assignment not found."
+            )
+        }
+
+        wallpaperItemDisplays.remove(at: index)
+
+        try saveRepositoryItemDisplays()
+    }
+    
+    public func editWallpaperItemDisplay(newWallpaperItemDisplay: WallpaperItemDisplay) throws {
+        // Make sure the display assignment exists
+        guard let index = wallpaperItemDisplays.firstIndex(where: {
+            $0.id == newWallpaperItemDisplay.id
+        }) else {
+            throw WallpaperRepositoryError("Wallpaper display assignment not found.")
+        }
+
+        // Make sure the wallpaper still exists
+        guard wallpaperItems.contains(where: {
+            $0.id == newWallpaperItemDisplay.wallpaperItem.id
+        }) else {
+            throw WallpaperRepositoryError("Wallpaper not found.")
+        }
+
+        // Update the display assignment
+        wallpaperItemDisplays[index] = newWallpaperItemDisplay
+
+        // Persist the change
+        try saveRepositoryItemDisplays()
     }
 }

@@ -110,4 +110,31 @@ final class WallpaperScreenManager {
             }
         }
     }
+    
+    public func syncWallpaperRepository(from wallpaperRepository: WallpaperRepository) {
+        for wallpaperItemDisplay in wallpaperRepository.getWallpaperItemDisplays() {
+            guard let wallpaperScreen = wallpaperScreens.first(where: { screen in
+                let displayID = screen.getDisplayID()
+                guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(displayID) else {
+                    return false
+                }
+                let cfUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
+                let displayUUID = UUID(uuid: unsafeBitCast(cfUUIDBytes, to: uuid_t.self))
+
+                return displayUUID == wallpaperItemDisplay.displayUUID
+            }) else {
+                continue
+            }
+            
+            let displayID = wallpaperScreen.getDisplayID()
+            let wallpaperItem = wallpaperItemDisplay.wallpaperItem
+            
+            playVideoOnScreen(displayID: displayID, videoURL: wallpaperItem.videoURL)
+            showScreen(displayID: displayID)
+            
+            setFitStyleOnScreen(displayID: displayID,newFitStyle: wallpaperItemDisplay.fitStyle)
+            setPlaybackSpeedOnScreen(displayID: displayID,newPlaybackSpeed: wallpaperItemDisplay.playbackSpeed)
+            setVolumeOnScreen(displayID: displayID, newVolume: wallpaperItemDisplay.volume)
+        }
+    }
 }

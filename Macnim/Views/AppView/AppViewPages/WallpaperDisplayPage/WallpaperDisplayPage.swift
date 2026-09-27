@@ -204,6 +204,14 @@ struct WallpaperDisplayPage: View {
             .frame(maxWidth: .infinity, alignment: .top)
             .padding(.horizontal, 32)
             .padding(.vertical, 28)
+            
+            WallpaperDisplayClearAllSection(
+                onClearAll: clearWallpaperDisplays
+            )
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 28)
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {

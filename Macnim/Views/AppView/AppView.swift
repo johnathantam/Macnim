@@ -29,13 +29,13 @@ struct AppView: View {
                     WallpaperBrowserPage()
 
                 case .favourites:
-                    Text("Hello")
+                    WallpaperFavouritesBrowserPage()
 
                 case .displays:
                     WallpaperDisplayPage()
 
                 case .settings:
-                    Text("Hello")
+                    AppSettingsPage()
                 }
         }
     }

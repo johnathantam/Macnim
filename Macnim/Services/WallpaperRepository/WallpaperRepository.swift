@@ -58,6 +58,9 @@ final class WallpaperRepository {
         // Load existing wallpapers
         self.wallpaperItems = try loadRepositoryItems()
         
+        // Load existing displays
+        self.wallpaperItemDisplays = try loadRepositoryItemDisplays()
+        
         // Add bundled wallpapers on first startup
         if isRepositoryStorageInitialized == false {
             try loadDefaultRepositoryItems()

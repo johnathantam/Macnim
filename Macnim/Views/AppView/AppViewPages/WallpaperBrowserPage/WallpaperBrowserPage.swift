@@ -46,10 +46,10 @@ struct WallpaperBrowserPage: View {
     @State private var searchText: String = ""
     private var searchedWallpaperItems: [WallpaperItem] {
         guard !searchText.isEmpty else {
-            return wallpaperRepository.wallpaperItems
+            return wallpaperRepository.getWallpaperItems()
         }
         
-        return wallpaperRepository.wallpaperItems.filter {
+        return wallpaperRepository.getWallpaperItems().filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -111,7 +111,7 @@ struct WallpaperBrowserPage: View {
                     playbackSpeed: wallpaperItemDisplayPayload.playbackSpeed
                 )
                 
-                if let existingDisplay = wallpaperRepository.wallpaperItemDisplays.first(where: { $0.displayUUID == displayUUID }) {
+                if let existingDisplay = wallpaperRepository.getWallpaperItemDisplays().first(where: { $0.displayUUID == displayUUID }) {
                     try wallpaperRepository.removeWallpaperItemDisplay(wallpaperItemDisplayId: existingDisplay.id)
                 }
                 
@@ -136,43 +136,48 @@ struct WallpaperBrowserPage: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            ScrollView {
-                WallpaperBrowserItemLayout( minimumColumnWidth: 240, spacing: 8 ) {
-                    ForEach(Array(wallpaperRepository.wallpaperItems.enumerated()), id: \.element.id) { index, wallpaperItem in
-                        // Place wallpaper item
-                        WallpaperBrowserItem(
-                            wallpaperItem: wallpaperItem,
+            if searchedWallpaperItems.isEmpty {
+                WallpaperBrowserEmptyView(isSearching: !searchText.isEmpty)
+            } else {
+                ScrollView {
+                    WallpaperBrowserItemLayout( minimumColumnWidth: 240, spacing: 8 ) {
+                        ForEach(Array(searchedWallpaperItems.enumerated()), id: \.element.id) { index, wallpaperItem in
+                            // Place wallpaper item
+                            WallpaperBrowserItem(
+                                wallpaperItem: wallpaperItem,
+                                
+                                onSelect: {
+                                    wallpaperBrowserPageAction = .selectWallpaper(wallpaperItem)
+                                },
+                                
+                                onEdit: {
+                                    wallpaperBrowserPageAction = .editWallpaper(wallpaperItem)
+                                },
+                                
+                                onRemove: {
+                                    wallpaperBrowserPageAction = .removeWallpaper(wallpaperItem)
+                                },
+                                
+                                onFavourite: {
+                                    favouriteWallpaperItem(wallpaperItem: wallpaperItem)
+                                }
+                            )
                             
-                            onSelect: {
-                                wallpaperBrowserPageAction = .selectWallpaper(wallpaperItem)
-                            },
-                            
-                            onEdit: {
-                                wallpaperBrowserPageAction = .editWallpaper(wallpaperItem)
-                            },
-                            
-                            onRemove: {
-                                wallpaperBrowserPageAction = .removeWallpaper(wallpaperItem)
-                            },
-                            
-                            onFavourite: {
-                                favouriteWallpaperItem(wallpaperItem: wallpaperItem)
+                            // Dynamically stagger wallpaper items
+                            if index == 0 {
+                                WallpaperBrowserDecorativeItem(width:240, height: 100)
+                            } else if index == 2 {
+                                WallpaperBrowserDecorativeItem(width: 240, height: 160)
+                            } else if index == 4 {
+                                WallpaperBrowserDecorativeItem(width: 240, height: 100)
                             }
-                        )
-                        
-                        // Dynamically stagger wallpaper items
-                        if index == 0 {
-                            WallpaperBrowserDecorativeItem(width:240, height: 100)
-                        } else if index == 2 {
-                            WallpaperBrowserDecorativeItem(width: 240, height: 160)
-                        } else if index == 4 {
-                            WallpaperBrowserDecorativeItem(width: 240, height: 100)
                         }
                     }
+                    .padding(8)
                 }
-                .padding(8)
+                .frame(maxWidth: .infinity)
+
             }
-            .frame(maxWidth: .infinity)
         }
         .searchable(
             text: $searchText,

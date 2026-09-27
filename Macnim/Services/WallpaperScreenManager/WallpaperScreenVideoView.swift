@@ -14,6 +14,10 @@ final class WallpaperScreenVideoView: NSView {
     private var queuePlayer: AVQueuePlayer?
     private var playerLayer: AVPlayerLayer?
     
+    private var fitStyle: WallpaperDisplayFitStyle = .fill
+    private var volume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
+    private var playbackSpeed: WallpaperDisplayPlaybackSpeed = .normal
+    
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
 
@@ -26,7 +30,38 @@ final class WallpaperScreenVideoView: NSView {
         fatalError("init(coder:) not implemented")
     }
     
-    func play(videoURL: URL) {
+    public func getFitStyle() -> WallpaperDisplayFitStyle {
+        return fitStyle
+    }
+    
+    public func setFitStyle(newFitStyle: WallpaperDisplayFitStyle) -> Void {
+        fitStyle = newFitStyle
+        playerLayer?.videoGravity = newFitStyle.videoGravity
+    }
+    
+    public func getVolume() -> WallpaperDisplayVolume {
+        return volume
+    }
+    
+    public func setVolume(newVolume: WallpaperDisplayVolume) -> Void {
+        volume = newVolume
+        queuePlayer?.volume = newVolume.value
+    }
+    
+    public func getPlaybackSpeed() -> WallpaperDisplayPlaybackSpeed {
+        return playbackSpeed
+    }
+    
+    public func setPlaybackSpeed(newPlaybackSpeed: WallpaperDisplayPlaybackSpeed) -> Void {
+        playbackSpeed = newPlaybackSpeed
+        queuePlayer?.rate = newPlaybackSpeed.rawValue
+    }
+    
+    public func isPlaying() -> Bool {
+        return queuePlayer != nil
+    }
+    
+    public func play(videoURL: URL) {
         // Remove any existing video
         playerLayer?.removeFromSuperlayer()
 
@@ -50,8 +85,12 @@ final class WallpaperScreenVideoView: NSView {
         player.isMuted = true
         player.play()
     }
+    
+    public func pause() {
+        queuePlayer?.pause()
+    }
 
-    func clear() {
+    public func clear() {
         queuePlayer?.pause()
         playerLayer?.removeFromSuperlayer()
 

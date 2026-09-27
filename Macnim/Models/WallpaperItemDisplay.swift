@@ -7,6 +7,7 @@
 
 import AppKit
 import Foundation
+import AVFoundation
 
 enum WallpaperDisplayFitStyle: String, CaseIterable, Identifiable, Codable {
     case fill
@@ -14,7 +15,9 @@ enum WallpaperDisplayFitStyle: String, CaseIterable, Identifiable, Codable {
     case stretch
     case center
 
-    var id: Self { self }
+    var id: Self {
+        self
+    }
 
     var title: String {
         switch self {
@@ -41,38 +44,53 @@ enum WallpaperDisplayFitStyle: String, CaseIterable, Identifiable, Codable {
                 "Displays the wallpaper at its original size, centered."
         }
     }
+    
+    var videoGravity: AVLayerVideoGravity {
+        switch self {
+            case .fill:
+                .resizeAspectFill
+            case .fit:
+                .resizeAspect
+            case .stretch:
+                .resize
+            case .center:
+                .resizeAspect
+            }
+        }
 }
 
 struct WallpaperDisplayVolume: Codable, Equatable {
-    static let min: Double = 0
-    static let max: Double = 1
-    static let `default`: Double = 1
+    static let min: Float = 0
+    static let max: Float = 1
+    static let `default`: Float = 1
 
-    var value: Double
+    var value: Float
 
-    init(_ value: Double = Self.default) {
+    init(_ value: Float = Self.default) {
         self.value = Swift.min(Swift.max(value, Self.min), Self.max)
     }
 }
 
-enum WallpaperDisplayPlaybackSpeed: Double, CaseIterable, Identifiable, Codable {
+enum WallpaperDisplayPlaybackSpeed: Float, CaseIterable, Identifiable, Codable {
     case half = 0.5
     case normal = 1.0
     case oneAndHalf = 1.5
     case double = 2.0
 
-    var id: Self { self }
+    var id: Self {
+        self
+    }
 
     var title: String {
         switch self {
-        case .half:
-            "0.5×"
-        case .normal:
-            "1×"
-        case .oneAndHalf:
-            "1.5×"
-        case .double:
-            "2×"
+            case .half:
+                "0.5×"
+            case .normal:
+                "1×"
+            case .oneAndHalf:
+                "1.5×"
+            case .double:
+                "2×"
         }
     }
 }

@@ -8,21 +8,26 @@
 import SwiftUI
 import AppKit
 
-struct DisplayScreensArrangementView: View {
-    @Environment(WallpaperRepository.self) private var wallpaperRepository
-    @Environment(WallpaperScreenManager.self) private var wallpaperScreenManager
-    
-    @Binding private var selectedScreenID: CGDirectDisplayID?
+struct FavouriteScreenArrangementView: View {
+    private var screens: [WallpaperFavouriteScreenOption]
+    private var selectedScreenIDs: Set<CGDirectDisplayID>
+    private var onToggle: (WallpaperFavouriteScreenOption) -> Void
 
-    private let arrangementHeight: CGFloat = 200
+    private let arrangementHeight: CGFloat = 125
     
-    init(selectedScreenID: Binding<CGDirectDisplayID?>) {
-        self._selectedScreenID = selectedScreenID
+    init(
+        screens: [WallpaperFavouriteScreenOption],
+        selectedScreenIDs: Set<CGDirectDisplayID>,
+        onToggle: @escaping (WallpaperFavouriteScreenOption) -> Void
+    ) {
+        self.screens = screens
+        self.selectedScreenIDs = selectedScreenIDs
+        self.onToggle = onToggle
     }
 
     private var arrangementBounds: CGRect {
-        wallpaperScreenManager.getScreens()
-            .map { $0.getFrame() }
+        screens
+            .map(\.frame)
             .reduce(into: CGRect.null) { result, frame in
                 result = result.union(frame)
             }
@@ -44,13 +49,13 @@ struct DisplayScreensArrangementView: View {
     }
     
     private func screenView(
-        _ screen: WallpaperScreen,
+        _ screen: WallpaperFavouriteScreenOption,
         scale: CGFloat,
         bounds: CGRect,
         containerSize: CGSize
     ) -> some View {
 
-        let frame = screen.getFrame()
+        let frame = screen.frame
 
         let width = frame.width * scale
         let height = frame.height * scale
@@ -63,9 +68,12 @@ struct DisplayScreensArrangementView: View {
 
         let offsetX = (containerSize.width - arrangementWidth) / 2
         let offsetY = (containerSize.height - arrangementHeight) / 2
-        
-        return DisplayScreenViewer(screen: screen, isSelected: selectedScreenID == screen.getDisplayID()) {
-            selectedScreenID = screen.getDisplayID()
+
+        return WallpaperFavouriteScreenOptionCard(
+            screen: screen,
+            isSelected: selectedScreenIDs.contains(screen.id)
+        ) {
+            onToggle(screen)
         }
         .frame(width: width, height: height)
         .position(
@@ -80,13 +88,7 @@ struct DisplayScreensArrangementView: View {
             let scale = scaleFactor(for: geometry.size)
 
             ZStack {
-                Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedScreenID = nil
-                        }
-                
-                ForEach(wallpaperScreenManager.getScreens()) { screen in
+                ForEach(screens) { screen in
                     screenView(
                         screen,
                         scale: scale,

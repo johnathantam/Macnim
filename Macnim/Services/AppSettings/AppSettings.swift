@@ -6,33 +6,73 @@
 //
 
 import SwiftUI
+import ServiceManagement
+
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case light, dark
+
+    var id: Self { self }
+
+    var label: String {
+        switch self {
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+}
 
 @Observable
 final class AppSettings {
     private let defaults = UserDefaults.standard
 
-    private let hasCompletedInitialSetupKey = "hasCompletedInitialSetup"
-    private let darkModeKey = "darkMode"
+    private var launchAtLoginEnabled: Bool
+    private let launchAtLoginEnabledKey = "launchAtLoginEnabled"
     
-    // MARK: - Startup
+    private var appearance: AppAppearance
+    private let appearanceKey = "appearance"
+    
+    init() {
+        self.launchAtLoginEnabled = defaults.bool(forKey: launchAtLoginEnabledKey)
+        
+        if let rawValue = defaults.string(forKey: appearanceKey), let appearance = AppAppearance(rawValue: rawValue) {
+            self.appearance = appearance
+        } else {
+            self.appearance = .light
+        }
+    }
 
-    var hasCompletedInitialSetup: Bool {
-        get {
-            defaults.bool(forKey: hasCompletedInitialSetupKey)
+    // MARK: - Startup
+    
+    public func getLaunchAtLoginEnabled() -> Bool {
+        return launchAtLoginEnabled
+    }
+
+    public func setLaunchAtLoginEnabled(_ enabled: Bool) throws {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
         }
-        set {
-            defaults.set(newValue, forKey: hasCompletedInitialSetupKey)
-        }
+        
+        self.launchAtLoginEnabled = enabled
+        defaults.set(enabled, forKey: launchAtLoginEnabledKey)
     }
 
     // MARK: - Appearance
 
-    var darkMode: Bool {
-        get {
-            defaults.bool(forKey: darkModeKey)
-        }
-        set {
-            defaults.set(newValue, forKey: darkModeKey)
-        }
+    public func getAppearance() -> AppAppearance {
+        return appearance
+    }
+
+    public func setAppearance(_ appearance: AppAppearance) {
+        self.appearance = appearance
+        defaults.set(appearance.rawValue, forKey: appearanceKey)
     }
 }

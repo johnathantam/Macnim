@@ -13,7 +13,7 @@ enum AppStartupState {
         appSettings: AppSettings,
         
         wallpaperRepository: WallpaperRepository,
-        wallpaperManager: WallpaperScreenManager
+        wallpaperScreenManager: WallpaperScreenManager
     )
     
     case failed(Error)
@@ -43,7 +43,7 @@ struct MacnimApp: App {
                     appSettings: appSettings,
                     
                     wallpaperRepository: wallpaperRepository,
-                    wallpaperManager: wallpaperScreenManager
+                    wallpaperScreenManager: wallpaperScreenManager
                 )
             )
         } catch {
@@ -56,11 +56,22 @@ struct MacnimApp: App {
     var body: some Scene {
         WindowGroup {
             switch appStartupState {
-                case let .ready(appSettings, wallpaperRepository, wallpaperManager):
+                case let .ready(appSettings, wallpaperRepository, wallpaperScreenManager):
                     AppView()
                         .environment(appSettings)
                         .environment(wallpaperRepository)
-                        .environment(wallpaperManager)
+                        .environment(wallpaperScreenManager)
+                        .task {
+                            // sync up runtime
+                            WallpaperSynchronizer.sync(
+                                wallpaperRepository: wallpaperRepository,
+                                wallpaperScreenManager: wallpaperScreenManager
+                            )
+                        }
+                        .preferredColorScheme(
+                            appSettings.getAppearance().colorScheme
+                        )
+                
 
                 case let .failed(error):
                     AppErrorView(error: error)

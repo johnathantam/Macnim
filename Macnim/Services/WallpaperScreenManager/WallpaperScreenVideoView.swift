@@ -66,14 +66,18 @@ final class WallpaperScreenVideoView: NSView {
         playerLayer?.removeFromSuperlayer()
 
         let item = AVPlayerItem(url: videoURL)
+        
         let player = AVQueuePlayer()
+        player.volume = volume.value
+        player.rate = playbackSpeed.rawValue
+        
         let looper = AVPlayerLooper(
             player: player,
             templateItem: item
         )
 
         let layer = AVPlayerLayer(player: player)
-        layer.videoGravity = .resizeAspectFill
+        layer.videoGravity = fitStyle.videoGravity
         layer.frame = bounds
 
         self.layer?.addSublayer(layer)
@@ -82,7 +86,6 @@ final class WallpaperScreenVideoView: NSView {
         self.playerLooper = looper
         self.playerLayer = layer
 
-        player.isMuted = true
         player.play()
     }
     

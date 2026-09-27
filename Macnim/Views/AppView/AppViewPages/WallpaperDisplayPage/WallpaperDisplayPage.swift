@@ -24,6 +24,31 @@ struct WallpaperDisplayPage: View {
     @State private var selectedWallpaperPlaybackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
     @State private var selectedWallpaperVolume: WallpaperDisplayVolume = WallpaperDisplayVolume(0)
     
+    private func loadSelectedDisplaySettings() -> Void {
+        guard let selectedScreenID else {
+            return
+        }
+
+        guard let displayCFUUID = CGDisplayCreateUUIDFromDisplayID(selectedScreenID) else {
+            return
+        }
+        let cfUUIDBytes = CFUUIDGetUUIDBytes(displayCFUUID.takeRetainedValue())
+        let displayUUID = UUID(
+            uuid: unsafeBitCast(cfUUIDBytes, to: uuid_t.self)
+        )
+
+        guard let selectedDisplay = wallpaperRepository.getWallpaperItemDisplays().first(where: {
+            $0.displayUUID == displayUUID
+        })
+        else {
+            return
+        }
+
+        selectedWallpaperDisplayFitStyle = selectedDisplay.fitStyle
+        selectedWallpaperPlaybackSpeed = selectedDisplay.playbackSpeed
+        selectedWallpaperVolume = selectedDisplay.volume
+    }
+
     private func applyWallpaperDisplay() -> Void {
         do {
             guard let selectedScreenID else {
@@ -67,8 +92,7 @@ struct WallpaperDisplayPage: View {
             // save display
             try wallpaperRepository.editWallpaperItemDisplay(newWallpaperItemDisplay: newDisplay)
         } catch {
-            showError = true
-            errorMessage = error.localizedDescription
+            
         }
     }
     
@@ -212,6 +236,9 @@ struct WallpaperDisplayPage: View {
             .frame(maxWidth: .infinity, alignment: .top)
             .padding(.horizontal, 32)
             .padding(.vertical, 28)
+        }
+        .onChange(of: selectedScreenID) {
+            loadSelectedDisplaySettings()
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {

@@ -52,7 +52,7 @@ struct AppViewSidebar: View {
 
             AppViewSidebarItem(
                 title: "Display Manager",
-                systemImage: "gearshape",
+                systemImage: "rectangle.on.rectangle.angled",
                 isSelected: selectedPage == .displays
             ) {
                 selectedPage = .displays

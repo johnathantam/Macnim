@@ -23,7 +23,7 @@ struct AppSettingsPage: View {
 
                 AppStartupSetting(
                     launchAtLoginEnabled: appSettings.getLaunchAtLoginEnabled(),
-                    onChange: { launchAtLoginEnabled in
+                    onChangeStartup: { launchAtLoginEnabled in
                         do {
                             try appSettings.setLaunchAtLoginEnabled(launchAtLoginEnabled)
                         } catch {

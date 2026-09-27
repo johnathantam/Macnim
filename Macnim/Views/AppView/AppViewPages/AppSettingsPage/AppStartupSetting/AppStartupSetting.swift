@@ -10,11 +10,11 @@ import ServiceManagement
 
 struct AppStartupSetting: View {
     private var launchAtLoginEnabled: Bool
-    private var onChange: (Bool) -> Void
+    private var onChangeStartup: (Bool) -> Void
     
-    init(launchAtLoginEnabled: Bool, onChange: @escaping (Bool) -> Void) {
+    init(launchAtLoginEnabled: Bool, onChangeStartup: @escaping (Bool) -> Void) {
         self.launchAtLoginEnabled = launchAtLoginEnabled
-        self.onChange = onChange
+        self.onChangeStartup = onChangeStartup
     }
 
     var body: some View {
@@ -41,7 +41,7 @@ struct AppStartupSetting: View {
                             launchAtLoginEnabled
                         },
                         set: { newValue in
-                            onChange(newValue)
+                            onChangeStartup(newValue)
                         }
                     )
                 )

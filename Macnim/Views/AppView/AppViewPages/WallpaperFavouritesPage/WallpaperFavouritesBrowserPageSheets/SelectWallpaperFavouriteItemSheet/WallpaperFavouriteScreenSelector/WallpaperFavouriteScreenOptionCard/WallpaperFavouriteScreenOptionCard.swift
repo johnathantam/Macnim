@@ -54,6 +54,5 @@ struct WallpaperFavouriteScreenOptionCard: View {
             }
         }
         .buttonStyle(.plain)
-        .cursorHoverPointer()
     }
 }

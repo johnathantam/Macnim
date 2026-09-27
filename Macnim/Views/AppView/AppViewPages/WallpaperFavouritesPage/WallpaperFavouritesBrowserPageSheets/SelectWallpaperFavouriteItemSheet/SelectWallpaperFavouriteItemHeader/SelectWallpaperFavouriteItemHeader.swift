@@ -37,7 +37,6 @@ struct SelectWallpaperFavouriteItemHeader: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .controlSize(.regular)
-            .cursorHoverPointer()
         }
         .padding(24)
     }

@@ -8,17 +8,16 @@
 import SwiftUI
 
 struct WallpaperScreenSelector: View {
+    @Environment(WallpaperScreenManager.self) private var wallpaperScreenManager
+    
     @Binding var selectedScreenIDs: Set<CGDirectDisplayID>
 
-    private let screens = WallpaperScreenOption.currentScreens()
- 
-    private func toggle(_ screen: WallpaperScreenOption) {
-        if selectedScreenIDs.contains(screen.id) {
+    private func toggle(_ screen: WallpaperScreen) {
+        if selectedScreenIDs.contains(screen.getDisplayID()) {
             // Keep at least one screen selected — an empty selection has nothing to apply to.
-            guard selectedScreenIDs.count > 1 else { return }
-            selectedScreenIDs.remove(screen.id)
+            selectedScreenIDs.remove(screen.getDisplayID())
         } else {
-            selectedScreenIDs.insert(screen.id)
+            selectedScreenIDs.insert(screen.getDisplayID())
         }
     }
 
@@ -28,7 +27,7 @@ struct WallpaperScreenSelector: View {
                 .font(.subheadline.weight(.medium))
 
             ScreenArrangementView(
-                screens: screens,
+                screens: wallpaperScreenManager.getScreens(),
                 selectedScreenIDs: selectedScreenIDs,
                 onToggle: toggle
             )

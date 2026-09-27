@@ -27,7 +27,6 @@ struct SelectWallpaperFavouriteItemFooter: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .keyboardShortcut(.cancelAction)
-                .cursorHoverPointer()
 
             Button("Set Wallpaper", action: onApply)
                 .buttonStyle(.glassProminent)
@@ -35,7 +34,6 @@ struct SelectWallpaperFavouriteItemFooter: View {
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canApply)
-                .cursorHoverPointer()
         }
         .padding(.horizontal, 24)
         .padding(.top, 20)

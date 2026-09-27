@@ -84,7 +84,6 @@ struct RemoveWallpaperItemSheet: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .keyboardShortcut(.cancelAction)
-                .cursorHoverPointer()
                 
                 Button(
                     "Delete Wallpaper",
@@ -97,7 +96,6 @@ struct RemoveWallpaperItemSheet: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
-                .cursorHoverPointer()
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)

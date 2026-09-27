@@ -81,7 +81,6 @@ struct AddWallpaperItemSheet: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .keyboardShortcut(.cancelAction)
-                .cursorHoverPointer()
 
                 Button("Add Wallpaper") {
                     addWallpaper()
@@ -91,7 +90,6 @@ struct AddWallpaperItemSheet: View {
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canAddWallpaperItem)
-                .cursorHoverPointer()
             }
             .padding(.horizontal, 24)
             .padding(.top, 24)

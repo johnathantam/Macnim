@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct WallpaperScreenOptionCard: View {
-    let screen: WallpaperScreenOption
+    let screen: WallpaperScreen
     let isSelected: Bool
     let onTap: () -> Void
 
     private var aspectRatio: CGFloat {
-        screen.frame.width / max(screen.frame.height, 1)
+        screen.getFrame().width / max(screen.getFrame().height, 1)
     }
 
     var body: some View {
@@ -42,10 +42,10 @@ struct WallpaperScreenOptionCard: View {
                 .frame(maxWidth: .infinity)
 
                 VStack(spacing: 1) {
-                    Text(screen.name)
+                    Text(screen.getLocalizedName())
                         .font(.caption.weight(.medium))
                         .lineLimit(1)
-                    if screen.isMain {
+                    if screen.isMain() {
                         Text("Main Display")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -54,6 +54,5 @@ struct WallpaperScreenOptionCard: View {
             }
         }
         .buttonStyle(.plain)
-        .cursorHoverPointer()
     }
 }

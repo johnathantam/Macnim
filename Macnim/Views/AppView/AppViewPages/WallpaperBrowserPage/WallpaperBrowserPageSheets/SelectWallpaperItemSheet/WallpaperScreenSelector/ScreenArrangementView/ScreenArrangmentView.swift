@@ -9,16 +9,16 @@ import SwiftUI
 import AppKit
 
 struct ScreenArrangementView: View {
-    private var screens: [WallpaperScreenOption]
+    private var screens: [WallpaperScreen]
     private var selectedScreenIDs: Set<CGDirectDisplayID>
-    private var onToggle: (WallpaperScreenOption) -> Void
+    private var onToggle: (WallpaperScreen) -> Void
 
     private let arrangementHeight: CGFloat = 125
     
     init(
-        screens: [WallpaperScreenOption],
+        screens: [WallpaperScreen],
         selectedScreenIDs: Set<CGDirectDisplayID>,
-        onToggle: @escaping (WallpaperScreenOption) -> Void
+        onToggle: @escaping (WallpaperScreen) -> Void
     ) {
         self.screens = screens
         self.selectedScreenIDs = selectedScreenIDs
@@ -27,7 +27,7 @@ struct ScreenArrangementView: View {
 
     private var arrangementBounds: CGRect {
         screens
-            .map(\.frame)
+            .map { $0.getFrame() }
             .reduce(into: CGRect.null) { result, frame in
                 result = result.union(frame)
             }
@@ -49,13 +49,13 @@ struct ScreenArrangementView: View {
     }
     
     private func screenView(
-        _ screen: WallpaperScreenOption,
+        _ screen: WallpaperScreen,
         scale: CGFloat,
         bounds: CGRect,
         containerSize: CGSize
     ) -> some View {
 
-        let frame = screen.frame
+        let frame = screen.getFrame()
 
         let width = frame.width * scale
         let height = frame.height * scale
@@ -71,7 +71,7 @@ struct ScreenArrangementView: View {
 
         return WallpaperScreenOptionCard(
             screen: screen,
-            isSelected: selectedScreenIDs.contains(screen.id)
+            isSelected: selectedScreenIDs.contains(screen.getDisplayID())
         ) {
             onToggle(screen)
         }

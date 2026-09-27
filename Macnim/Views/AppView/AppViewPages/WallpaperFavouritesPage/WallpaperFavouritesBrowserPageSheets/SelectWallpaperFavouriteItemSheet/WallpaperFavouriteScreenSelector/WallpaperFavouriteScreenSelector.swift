@@ -15,7 +15,6 @@ struct WallpaperFavouriteScreenSelector: View {
     private func toggle(_ screen: WallpaperFavouriteScreenOption) {
         if selectedScreenIDs.contains(screen.id) {
             // Keep at least one screen selected — an empty selection has nothing to apply to.
-            guard selectedScreenIDs.count > 1 else { return }
             selectedScreenIDs.remove(screen.id)
         } else {
             selectedScreenIDs.insert(screen.id)

@@ -70,7 +70,6 @@ struct EditWallpaperItemSheet: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.large)
                 .keyboardShortcut(.cancelAction)
-                .cursorHoverPointer()
 
                 Button("Save Changes") {
                     saveWallpaper()
@@ -80,7 +79,6 @@ struct EditWallpaperItemSheet: View {
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canSaveWallpaperItem)
-                .cursorHoverPointer()
             }
             .padding(.horizontal, 24)
             .padding(.top, 24)

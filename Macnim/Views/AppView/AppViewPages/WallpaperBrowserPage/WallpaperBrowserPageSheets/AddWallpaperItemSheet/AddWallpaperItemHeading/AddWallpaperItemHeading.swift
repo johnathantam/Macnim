@@ -38,7 +38,6 @@ struct AddWallpaperItemHeader: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .controlSize(.regular)
-            .cursorHoverPointer()
         }
         .padding(24)
     }

@@ -16,7 +16,7 @@ struct SelectWallpaperItemSheet: View {
     
     private var onApply: (WallpaperItemDisplayPayload) -> Void
 
-    @State private var selectedScreenIDs: Set<CGDirectDisplayID>
+    @State private var selectedScreenIDs: Set<CGDirectDisplayID> = []
     
     @State private var fitStyle: WallpaperDisplayFitStyle = WallpaperDisplayFitStyle.fill
     @State private var playbackSpeed: WallpaperDisplayPlaybackSpeed = WallpaperDisplayPlaybackSpeed.normal
@@ -29,10 +29,6 @@ struct SelectWallpaperItemSheet: View {
     init(wallpaperItem: WallpaperItem, onApply: @escaping (WallpaperItemDisplayPayload) -> Void) {
         self.wallpaperItem = wallpaperItem
         self.onApply = onApply
-        
-        // Default to every connected screen selected, matching how most
-        // system wallpaper pickers behave out of the box.
-        _selectedScreenIDs = State(initialValue: Set(WallpaperScreenOption.currentScreens().map(\.id)))
     }
 
     private func applyWallpaper() {
@@ -86,6 +82,7 @@ struct SelectWallpaperItemSheet: View {
             minHeight: 500,
         )
     }
+    
 }
 
 #Preview {

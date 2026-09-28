@@ -23,6 +23,11 @@ struct AppView: View {
             AppViewSidebar(
                 selectedPage: $selectedPage
             )
+            .navigationSplitViewColumnWidth(
+                min: 220,
+                ideal: 260,
+                max: 320
+            )
         } detail: {
             switch selectedPage {
                 case .wallpapers:

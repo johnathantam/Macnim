@@ -13,8 +13,6 @@ struct AppErrorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
-
             VStack(spacing: 16) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 36))
@@ -33,15 +31,15 @@ struct AppErrorView: View {
                 }
             }
             
-            Spacer()
-
             Button("Quit Macnim") {
                 NSApplication.shared.terminate(nil)
             }
             .keyboardShortcut(.defaultAction)
             .controlSize(.large)
+            .padding(.top, 20)
+            .padding(.bottom, 10)
         }
-        .frame(width: 380, height: 260)
+        .frame(width: 600, height: 400)
         .background(.windowBackground)
     }
 }

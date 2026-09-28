@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct MacnimApp: App {
+
+    @NSApplicationDelegateAdaptor(AppDelegate.self)
+    private var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {
+            EmptyView()
         }
     }
 }

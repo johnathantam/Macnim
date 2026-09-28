@@ -167,10 +167,12 @@ final class WallpaperRepository {
     
     private func loadDefaultRepositoryItems() throws {
         let defaultWallpapers = [
-            (wallpaperName: "Bells", wallpaperVideoName: "bell-wallpaper"),
-            (wallpaperName: "Bus Ride", wallpaperVideoName: "bus-wallpaper"),
-            (wallpaperName: "Smoke", wallpaperVideoName: "smoke-wallpaper"),
-            (wallpaperName: "Testing", wallpaperVideoName: "test-wallpaper")
+            (wallpaperName: "Cat Train", wallpaperVideoName: "cat-train-wallpaper"),
+            (wallpaperName: "Flowers in Darkness", wallpaperVideoName: "flowers-in-darkness-wallpaper"),
+            (wallpaperName: "Painting Sharks", wallpaperVideoName: "painting-sharks-wallpaper"),
+            (wallpaperName: "Purple Sky", wallpaperVideoName: "purple-sky-wallpaper"),
+            (wallpaperName: "Red Eye", wallpaperVideoName: "red-eye-wallpaper"),
+            (wallpaperName: "White Streaks", wallpaperVideoName: "white-streaks-wallpaper")
         ]
         
         for defaultWallpaper in defaultWallpapers {

@@ -62,11 +62,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func createMainWindow() -> NSWindow {
-        let contentView = AppView()
+        let contentView = AppRootView()
             .environment(appSettings)
             .environment(wallpaperRepository)
             .environment(wallpaperScreenManager)
-            .preferredColorScheme(appSettings.getAppearance().colorScheme)
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 900, height: 600),

@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build
+      - name: Build Macnim
         run: |
           xcodebuild \
             -project Macnim.xcodeproj \
@@ -22,8 +22,18 @@ jobs:
             -derivedDataPath build \
             build
 
-      - name: Upload app
-        uses: actions/upload-artifact@v4
+      - name: Create DMG
+        run: |
+          mkdir -p dmg
+          cp -R build/Build/Products/Release/Macnim.app dmg/
+          hdiutil create \
+            -volname "Macnim" \
+            -srcfolder dmg \
+            -ov \
+            -format UDZO \
+            Macnim.dmg
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: Macnim
-          path: build/Build/Products/Release/Macnim.app
+          files: Macnim.dmg

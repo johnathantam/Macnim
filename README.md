@@ -1,5 +1,7 @@
 # Macnim
 
+![Macnim app preview](Docs/images/appPreview.png)
+
 Macnim is a macOS app that lets you set animated video wallpapers on your desktop displays. It supports multiple monitors, per-display configuration, and a simple library of wallpapers that can be managed from the app.
 
 ## How the app works

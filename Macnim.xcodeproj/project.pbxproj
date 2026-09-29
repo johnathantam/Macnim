@@ -11,6 +11,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		DC235F24306B697300F5C14B /* Docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Docs;
+			sourceTree = "<group>";
+		};
 		DC39861B305725C600C90FFB /* Macnim */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Macnim;
@@ -34,6 +39,7 @@
 			children = (
 				DC39861B305725C600C90FFB /* Macnim */,
 				DC39861A305725C600C90FFB /* Products */,
+				DC235F24306B697300F5C14B /* Docs */,
 			);
 			sourceTree = "<group>";
 		};
@@ -61,6 +67,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				DC235F24306B697300F5C14B /* Docs */,
 				DC39861B305725C600C90FFB /* Macnim */,
 			);
 			name = Macnim;

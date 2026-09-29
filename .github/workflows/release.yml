@@ -1,3 +1,46 @@
+# name: Release Macnim
+
+# on:
+#   push:
+#     tags:
+#       - "v*"
+
+# permissions:
+#   contents: write
+
+# jobs:
+#   release:
+#     runs-on: macos-latest
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Build Macnim
+#         run: |
+#           xcodebuild \
+#             -project Macnim.xcodeproj \
+#             -scheme Macnim \
+#             -configuration Release \
+#             -derivedDataPath build \
+#             build
+
+#       - name: Create DMG
+#         run: |
+#           mkdir -p dmg
+#           cp -R build/Build/Products/Release/Macnim.app dmg/
+#           hdiutil create \
+#             -volname "Macnim" \
+#             -srcfolder dmg \
+#             -ov \
+#             -format UDZO \
+#             Macnim.dmg
+
+#       - name: Create GitHub Release
+#         uses: softprops/action-gh-release@v2
+#         with:
+#           files: Macnim.dmg
+
 name: Release Macnim
 
 on:
@@ -16,19 +59,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          xcode-select -p
+
       - name: Build Macnim
         run: |
           xcodebuild \
             -project Macnim.xcodeproj \
             -scheme Macnim \
             -configuration Release \
+            -sdk macosx \
             -derivedDataPath build \
             build
+
+      - name: Inspect built app
+        run: |
+          echo "=== Executable ==="
+          file build/Build/Products/Release/Macnim.app/Contents/MacOS/Macnim
+
+          echo "=== App contents ==="
+          find build/Build/Products/Release/Macnim.app/Contents -maxdepth 3 -type f
+
+          echo "=== Code signing ==="
+          codesign -dv --verbose=4 \
+            build/Build/Products/Release/Macnim.app \
+            2>&1 || true
 
       - name: Create DMG
         run: |
           mkdir -p dmg
           cp -R build/Build/Products/Release/Macnim.app dmg/
+
           hdiutil create \
             -volname "Macnim" \
             -srcfolder dmg \

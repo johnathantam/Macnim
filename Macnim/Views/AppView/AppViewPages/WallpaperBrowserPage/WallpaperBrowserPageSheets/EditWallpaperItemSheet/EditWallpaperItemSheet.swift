@@ -48,8 +48,8 @@ struct EditWallpaperItemSheet: View {
             // Video preview — display only, not editable
             EditWallpaperVideoPreview(
                 videoURL: wallpaperItem.videoURL,
-                muted: true,
-                playbackSpeed: 1.00
+                playbackSpeed: .normal,
+                volume: WallpaperDisplayVolume(0)
             )
 
             // Name input

@@ -9,61 +9,29 @@ import SwiftUI
 import AVKit
 
 struct RemoveWallpaperVideoPreview: View {
-    
     let videoURL: URL
+    let playbackSpeed: WallpaperDisplayPlaybackSpeed
+    let volume: WallpaperDisplayVolume
     
-    @State private var player: AVPlayer?
-    @State private var loopObserver: NSObjectProtocol?
-    
+    init(
+        videoURL: URL,
+        playbackSpeed: WallpaperDisplayPlaybackSpeed,
+        volume: WallpaperDisplayVolume
+    ) {
+        self.videoURL = videoURL
+        self.playbackSpeed = playbackSpeed
+        self.volume = volume
+    }
+
     var body: some View {
-        Group {
-            if let player {
-                VideoPlayer(player: player)
-                    .disabled(true)
-            } else {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.gray.opacity(0.08))
-            }
-        }
+        LoopingVideoPlayer(
+            videoURL: videoURL,
+            playbackSpeed: playbackSpeed,
+            volume: volume,
+        )
         .frame(maxWidth: .infinity)
         .frame(height: 170)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, 24)
-        .onAppear {
-            let item = AVPlayerItem(url: videoURL)
-            let newPlayer = AVPlayer(playerItem: item)
-            
-            newPlayer.isMuted = true
-            newPlayer.play()
-            
-            loopObserver = NotificationCenter.default.addObserver(
-                forName: .AVPlayerItemDidPlayToEndTime,
-                object: item,
-                queue: .main
-            ) { _ in
-                newPlayer.seek(to: .zero)
-                newPlayer.play()
-            }
-            
-            player = newPlayer
-        }
-        .onDisappear {
-            player?.pause()
-            
-            if let loopObserver {
-                NotificationCenter.default.removeObserver(loopObserver)
-            }
-        }
     }
-}
-
-#Preview {
-    RemoveWallpaperVideoPreview(
-        videoURL: Bundle.main.url(
-            forResource: "test-wallpaper",
-            withExtension: "mp4"
-        )!
-    )
-    .frame(width: 420)
-    .padding()
 }

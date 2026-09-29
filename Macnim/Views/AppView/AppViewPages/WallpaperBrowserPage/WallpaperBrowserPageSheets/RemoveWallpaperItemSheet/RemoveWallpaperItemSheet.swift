@@ -37,7 +37,9 @@ struct RemoveWallpaperItemSheet: View {
             
             // Video preview
             RemoveWallpaperVideoPreview(
-                videoURL: wallpaperItem.videoURL
+                videoURL: wallpaperItem.videoURL,
+                playbackSpeed: .normal,
+                volume: WallpaperDisplayVolume(0)
             )
             
             // Delete warning
